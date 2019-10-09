@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import model.Cell;
 import model.CellState;
+import model.Grain;
 import model.Model;
 
 import java.net.URL;
@@ -48,24 +49,26 @@ public class Controller implements Initializable {
     }
 
     public void startNucleating(ActionEvent actionEvent) {
-        int numberOfGrains = 0;
-
-        try{
-            numberOfGrains = Integer.parseInt(fieldGrains.getText());
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-        }
+        int numberOfGrains;
 
         if (model != null){
+            numberOfGrains = readValueFromTextField(fieldGrains);
             model.fillGridWIthGrains(numberOfGrains);
             showGridOnCanvas();
         }
     }
 
     public void startGrowth(ActionEvent actionEvent) {
+        if (model != null){
+            model.startSimulation();
+            model.determineBorders();
+            showGridOnCanvas();
+        }
     }
 
     public void startClear(ActionEvent actionEvent) {
+        cleanCanvas();
+        createNewModel();
     }
 
     public void startAddInclusions(ActionEvent actionEvent) {
@@ -94,11 +97,23 @@ public class Controller implements Initializable {
                     Cell holdCell = holdGrid[i][j];
                     if (holdCell.getState().equals(CellState.GRAIN)) {
                         gc.setFill(holdCell.getGrain().getColor());
+//                        if (holdCell.isOnBorder()) gc.setFill(Grain.BORDER_COLOR);    //do rysowania krawędzi
                         gc.fillRect(i, j, 1, 1);
                     }
                 }
             }
         }
+    }
+
+    private int readValueFromTextField(TextField field){
+        int value = 0;
+
+        try{
+            value = Integer.parseInt(field.getText());
+        } catch (NumberFormatException ignored) {
+        }
+
+        return value;
     }
 
 }

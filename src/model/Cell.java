@@ -15,6 +15,7 @@ public class Cell {
 
     public Cell() {
         state = EMPTY;
+        grain = null;
     }
 
     public CellState getState() {
@@ -41,7 +42,7 @@ public class Cell {
         this.grain = grain;
     }
 
-    public void turnToGrain(){
+    public void createNewGrain(){
         float r, g, b;
         Color color;
 
@@ -58,6 +59,10 @@ public class Cell {
     }
 
     private boolean isGrainColorAvailable(Color color){
+        if (Grain.restrictedColors.contains(color)){
+            return false;
+        }
+
         for (Grain g : listOfGrains){
             if (g.getColor().equals(color))
                 return false;
