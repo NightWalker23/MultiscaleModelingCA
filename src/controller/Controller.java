@@ -56,6 +56,9 @@ public class Controller implements Initializable {
 
         if (model != null){
             numberOfGrains = readValueFromTextField(fieldGrains);
+            if (numberOfGrains >((int) canvas.getWidth() * (int) canvas.getHeight())){
+                numberOfGrains = (int) canvas.getWidth() * (int) canvas.getHeight();
+            }
             model.fillGridWIthGrains(numberOfGrains);
             showGridOnCanvas();
         }
