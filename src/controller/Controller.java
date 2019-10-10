@@ -20,7 +20,7 @@ public class Controller implements Initializable {
     public Canvas canvas;
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
-    public TextField fieldGrains, fieldMCS, fieldInclusionsAmount, fieldPercent, fieldInclusionsSize;
+    public TextField fieldGrains, fieldX, fieldY, fieldMCS, fieldInclusionsAmount, fieldPercent, fieldInclusionsSize;
     public RadioButton radioCA, radioMC;
     public Button buttonGrowth, buttonNucleating, buttonAddInclusions, buttonSelectAll, buttonClear;
     public CheckBox checkBoxShape, checkBoxSelectN, checkBoxSUB;
@@ -32,8 +32,8 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         gc = canvas.getGraphicsContext2D();
-        cleanCanvas();
-        createNewModel();
+//        cleanCanvas();
+//        createNewModel();
     }
 
     public void importDataFile(ActionEvent actionEvent) {
@@ -50,6 +50,9 @@ public class Controller implements Initializable {
 
     public void startNucleating(ActionEvent actionEvent) {
         int numberOfGrains;
+
+        cleanCanvas();
+        createNewModel();
 
         if (model != null){
             numberOfGrains = readValueFromTextField(fieldGrains);
@@ -83,7 +86,29 @@ public class Controller implements Initializable {
     }
 
     private void createNewModel() {
-        model = new Model((int)canvas.getWidth(), (int)canvas.getHeight());
+//        model = new Model((int)canvas.getWidth(), (int)canvas.getHeight());
+        int x, y;
+        x = readValueFromTextField(fieldY);
+        y = readValueFromTextField(fieldX);
+
+        if (x > (int)canvas.getWidth()) {
+            x = (int) canvas.getWidth();
+            fieldX.setText(String.valueOf(x));
+        }
+        if (x < 0) {
+            x = 0;
+            fieldX.setText(String.valueOf(x));
+        }
+        if (y > (int)canvas.getHeight()) {
+            y = (int) canvas.getHeight();
+            fieldX.setText(String.valueOf(y));
+        }
+        if (y < 0) {
+            y = 0;
+            fieldX.setText(String.valueOf(y));
+        }
+
+        model = new Model(y, x);
     }
 
     private void showGridOnCanvas() {

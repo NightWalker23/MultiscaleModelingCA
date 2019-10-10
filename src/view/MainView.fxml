@@ -13,11 +13,11 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<GridPane hgap="10" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="550.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
+<GridPane hgap="10" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="700.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
    <children>
-      <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="550.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+      <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="700.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
          <children>
-            <Canvas fx:id="canvas" height="300.0" layoutY="25.0" width="300.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0" />
+            <Canvas fx:id="canvas" height="500.0" layoutY="25.0" width="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0" />
             <VBox prefHeight="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
                   <MenuBar fx:id="menuBar" VBox.vgrow="ALWAYS">
@@ -42,16 +42,21 @@
                   </MenuBar>
                </children>
             </VBox>
-            <Label layoutX="300.0" layoutY="25.0" text="Number of grains" AnchorPane.leftAnchor="310.0" AnchorPane.topAnchor="35.0" />
-            <TextField fx:id="fieldGrains" layoutX="415.0" layoutY="31.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="80.0" AnchorPane.leftAnchor="415.0" AnchorPane.topAnchor="31.0" />
+            <Label layoutX="300.0" layoutY="25.0" text="Number of grains" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="35.0" />
+            <TextField fx:id="fieldGrains" layoutX="415.0" layoutY="31.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="80.0" AnchorPane.leftAnchor="615.0" AnchorPane.topAnchor="31.0" />
             <!--<RadioButton fx:id="radioCA" layoutX="310.0" layoutY="61.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="17.0" prefWidth="40.0" text="CA" AnchorPane.leftAnchor="310.0" AnchorPane.topAnchor="61.0" />
             <RadioButton fx:id="radioMC" layoutX="357.0" layoutY="61.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="17.0" prefWidth="50.0" text="MC" AnchorPane.leftAnchor="357.0" AnchorPane.topAnchor="61.0" />
             <Label layoutX="310.0" layoutY="88.0" text="MCS" AnchorPane.leftAnchor="310.0" AnchorPane.topAnchor="88.0" />
             <TextField fx:id="fieldMCS" layoutX="347.0" layoutY="84.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="80.0" AnchorPane.leftAnchor="347.0" AnchorPane.topAnchor="84.0" />
             -->
-            <Button fx:id="buttonNucleating" layoutX="309.0" layoutY="119.0" mnemonicParsing="false" onAction="#startNucleating" text="Nucleating" AnchorPane.leftAnchor="310.0" AnchorPane.topAnchor="119.0" />
-            <Button fx:id="buttonGrowth" layoutX="310.0" layoutY="150.0" mnemonicParsing="false" onAction="#startGrowth" prefHeight="25.0" prefWidth="74.0" text="Growth" AnchorPane.leftAnchor="310.0" AnchorPane.topAnchor="150.0" />
-            <Button fx:id="buttonClear" layoutX="387.0" layoutY="116.0" mnemonicParsing="false" onAction="#startClear" prefHeight="56.0" prefWidth="56.0" text="Reset" AnchorPane.leftAnchor="390.0" AnchorPane.topAnchor="119.0" />
+            <Button fx:id="buttonNucleating" layoutX="510.0" layoutY="99.0" mnemonicParsing="false" onAction="#startNucleating" text="Nucleating" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="99.0" />
+            <Button fx:id="buttonGrowth" layoutX="510.0" layoutY="127.0" mnemonicParsing="false" onAction="#startGrowth" prefHeight="25.0" prefWidth="74.0" text="Growth" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="127.0" />
+            <Button fx:id="buttonClear" layoutX="598.0" layoutY="96.0" mnemonicParsing="false" onAction="#startClear" prefHeight="56.0" prefWidth="56.0" text="Reset" AnchorPane.leftAnchor="598.0" AnchorPane.topAnchor="96.0" />
+            <TextField fx:id="fieldX" layoutX="581.0" layoutY="64.0" prefHeight="25.0" prefWidth="46.0" AnchorPane.leftAnchor="581.0" AnchorPane.topAnchor="64.0" />
+            <TextField fx:id="fieldY" layoutX="649.0" layoutY="64.0" prefHeight="25.0" prefWidth="46.0" AnchorPane.leftAnchor="649.0" AnchorPane.topAnchor="64.0" />
+            <Label layoutX="510.0" layoutY="68.0" text="Grid size" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="68.0" />
+            <Label layoutX="569.0" layoutY="68.0" text="X" AnchorPane.leftAnchor="569.0" AnchorPane.topAnchor="68.0" />
+            <Label layoutX="636.0" layoutY="68.0" text="Y" AnchorPane.leftAnchor="636.0" AnchorPane.topAnchor="68.0" />
             <!--<CheckBox fx:id="checkBoxShape" layoutX="311.0" layoutY="183.0" mnemonicParsing="false" text="Shape control" AnchorPane.leftAnchor="311.0" AnchorPane.topAnchor="183.0" />
             <TextField fx:id="fieldPercent" layoutX="313.0" layoutY="210.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="50.0" AnchorPane.leftAnchor="310.0" AnchorPane.topAnchor="210.0" />
             <Label layoutX="363.0" layoutY="214.0" text="\%" AnchorPane.leftAnchor="363.0" AnchorPane.topAnchor="214.0" />

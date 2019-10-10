@@ -84,8 +84,8 @@ public class Model {
     public void process(Cell[][] frame) {
         Cell[][] tmp = getTmp();
         Cell frameCell, tmpCell;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 frameCell = frame[i][j];
                 tmpCell = tmp[i][j];
                 if (frameCell.getState() == EMPTY) {
@@ -100,11 +100,11 @@ public class Model {
             }
         }
 
-        for (int i = 0; i < height; i++)
-            System.arraycopy(tmp[i], 0, grid[i], 0, width);
+        for (int i = 0; i < width; i++)
+            System.arraycopy(tmp[i], 0, grid[i], 0, height);
 
         listOfCells = new ArrayList<>();
-        for (int i = 0; i < height; i++) {
+        for (int i = 0; i < width; i++) {
             listOfCells.addAll(new ArrayList<Cell>(Arrays.asList(grid[i])));
         }
 
@@ -117,9 +117,9 @@ public class Model {
     }
 
     private Cell[][] getTmp() {
-        Cell[][] tmp = new Cell[height][width];
-        for (int i = 0; i < height; i++)
-            for (int j = 0; j < width; j++)
+        Cell[][] tmp = new Cell[width][height];
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
                 tmp[i][j] = new Cell();
 
         return tmp;
@@ -140,7 +140,7 @@ public class Model {
             indexes.iG = -1;
         else indexes.iG = i - 1;
 
-        if (i == this.height - 1)
+        if (i == this.width - 1)
             indexes.iD = -1;
         else indexes.iD = i + 1;
 
@@ -148,7 +148,7 @@ public class Model {
             indexes.jL = -1;
         else indexes.jL = j - 1;
 
-        if (j == this.width - 1)
+        if (j == this.height - 1)
             indexes.jR = -1;
         else indexes.jR = j + 1;
 
