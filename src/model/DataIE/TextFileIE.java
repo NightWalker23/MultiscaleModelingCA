@@ -69,7 +69,7 @@ public class TextFileIE extends DataIE {
         if (ret == JFileChooser.APPROVE_OPTION) {
             try {
                 int x, y, ID;
-                CellState state = CellState.GRAIN;
+                CellState state;
                 Color color;
                 boolean onBorder;
 
@@ -88,7 +88,7 @@ public class TextFileIE extends DataIE {
                     y = Integer.parseInt(splittedLine[1]);
                     ID = Integer.parseInt(splittedLine[2]);
                     color = Color.valueOf(splittedLine[3]);
-                    //state = Integer.parseInt(splittedLine[4]);
+                    state = CellState.fromString(splittedLine[4]);
                     onBorder = Boolean.parseBoolean(splittedLine[5]);
 
                     modelBitmap.getGrid()[x][y].turnToGrain(ID, state, color, onBorder);
