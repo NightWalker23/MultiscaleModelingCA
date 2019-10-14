@@ -8,6 +8,9 @@ import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import model.Cell;
 import model.CellState;
+import model.DataIE.BitmapIE;
+import model.DataIE.DataIE;
+import model.DataIE.TextFileIE;
 import model.Grain;
 import model.Model;
 
@@ -20,32 +23,46 @@ public class Controller implements Initializable {
     public Canvas canvas;
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
-    public TextField fieldGrains, fieldX, fieldY, fieldMCS, fieldInclusionsAmount, fieldPercent, fieldInclusionsSize;
-    public RadioButton radioCA, radioMC;
-    public Button buttonGrowth, buttonNucleating, buttonAddInclusions, buttonSelectAll, buttonClear;
-    public CheckBox checkBoxShape, checkBoxSelectN, checkBoxSUB;
-    public ChoiceBox choiceBoxInclusionsType;
+    public TextField fieldGrains, fieldX, fieldY;//, fieldMCS, fieldInclusionsAmount, fieldPercent, fieldInclusionsSize;
+    //public RadioButton radioCA, radioMC;
+    public Button buttonGrowth, buttonNucleating, buttonClear;// buttonAddInclusions, buttonSelectAll, ;
+    //public CheckBox checkBoxShape, checkBoxSelectN, checkBoxSUB;
+    //public ChoiceBox choiceBoxInclusionsType;
 
     private GraphicsContext gc;
     private Model model;
+    private DataIE dataIE;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         gc = canvas.getGraphicsContext2D();
-//        cleanCanvas();
-//        createNewModel();
+        fieldX.setText(String.valueOf(500));
+        fieldY.setText(String.valueOf(500));
     }
 
     public void importDataFile(ActionEvent actionEvent) {
+        dataIE = TextFileIE.getInstance();
+        model = dataIE.importData();
+        setFieldsText();
+        cleanCanvas();
+        showGridOnCanvas();
     }
 
     public void importBitmap(ActionEvent actionEvent) {
+        dataIE = BitmapIE.getInstance();
+        model = dataIE.importData();
+        setFieldsText();
+        cleanCanvas();
+        showGridOnCanvas();
     }
 
     public void exportDataFile(ActionEvent actionEvent) {
+        dataIE = TextFileIE.getInstance();
+        dataIE.exportData(model);
     }
 
     public void exportBitmap(ActionEvent actionEvent) {
+        dataIE = BitmapIE.getInstance();
     }
 
     public void startNucleating(ActionEvent actionEvent) {
@@ -89,29 +106,25 @@ public class Controller implements Initializable {
     }
 
     private void createNewModel() {
-//        model = new Model((int)canvas.getWidth(), (int)canvas.getHeight());
         int x, y;
         x = readValueFromTextField(fieldY);
         y = readValueFromTextField(fieldX);
 
         if (x > (int)canvas.getWidth()) {
             x = (int) canvas.getWidth();
-            fieldX.setText(String.valueOf(x));
         }
         if (x < 0) {
             x = 0;
-            fieldX.setText(String.valueOf(x));
         }
         if (y > (int)canvas.getHeight()) {
             y = (int) canvas.getHeight();
-            fieldX.setText(String.valueOf(y));
         }
         if (y < 0) {
             y = 0;
-            fieldX.setText(String.valueOf(y));
         }
 
         model = new Model(y, x);
+        setFieldsText();
     }
 
     private void showGridOnCanvas() {
@@ -142,6 +155,11 @@ public class Controller implements Initializable {
         }
 
         return value;
+    }
+
+    private void setFieldsText(){
+        fieldY.setText(String.valueOf(model.getHeight()));
+        fieldX.setText(String.valueOf(model.getWidth()));
     }
 
 }

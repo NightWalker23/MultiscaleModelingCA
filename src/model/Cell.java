@@ -58,6 +58,18 @@ public class Cell {
         state = GRAIN;
     }
 
+    public void turnToGrain(int ID, CellState state, Color color, boolean onBorder){
+        this.state = state;
+        this.onBorder = onBorder;
+        Grain holdGrain = getGrainByID(ID);
+        if (holdGrain == null) {
+            grain = new Grain(ID, color);
+            listOfGrains.add(grain);
+        } else {
+            grain = holdGrain;
+        }
+    }
+
     private boolean isGrainColorAvailable(Color color){
         if (Grain.restrictedColors.contains(color)){
             return false;
@@ -68,5 +80,13 @@ public class Cell {
                 return false;
         }
         return true;
+    }
+
+    private Grain getGrainByID(int ID){
+        for (Grain g : listOfGrains){
+            if (g.getID() == ID)
+                return g;
+        }
+        return null;
     }
 }
