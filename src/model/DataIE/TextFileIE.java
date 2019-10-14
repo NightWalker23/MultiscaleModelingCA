@@ -6,12 +6,13 @@ import model.CellState;
 import model.Model;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
-public class TextFileIE extends DataIE {
+public class TextFileIE {
 
     private static TextFileIE textFileIE;
 
@@ -25,7 +26,6 @@ public class TextFileIE extends DataIE {
         return textFileIE;
     }
 
-    @Override
     public void exportData(Model model) {
         if (model != null && model.getListOfAvailableCells().size() == 0) {
             JFileChooser chooser = new JFileChooser();
@@ -58,11 +58,15 @@ public class TextFileIE extends DataIE {
         }
     }
 
-    @Override
     public Model importData() {
-        Model modelBitmap = null   ;
+        /*
+        TODO: dodać tą funkcję do wykonywania w nowym wątku
+         */
+        Model modelTextFile = null;
 
         JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt");
+        chooser.setFileFilter(filter);
         chooser.setCurrentDirectory(new File("./"));
 
         int ret = chooser.showOpenDialog(null);
@@ -78,11 +82,11 @@ public class TextFileIE extends DataIE {
                 String[] splittedLine = line.split("\t");
                 x = Integer.parseInt(splittedLine[0]);
                 y = Integer.parseInt(splittedLine[1]);
-                modelBitmap = new Model(x, y);
+                modelTextFile = new Model(x, y);
 
                 line = br.readLine();
 
-                while (line != null){
+                while (line != null) {
                     splittedLine = line.split("\t");
                     x = Integer.parseInt(splittedLine[0]);
                     y = Integer.parseInt(splittedLine[1]);
@@ -91,7 +95,7 @@ public class TextFileIE extends DataIE {
                     state = CellState.fromString(splittedLine[4]);
                     onBorder = Boolean.parseBoolean(splittedLine[5]);
 
-                    modelBitmap.getGrid()[x][y].turnToGrain(ID, state, color, onBorder);
+                    modelTextFile.getGrid()[x][y].turnToGrain(ID, state, color, onBorder);
                     line = br.readLine();
                 }
 
@@ -101,6 +105,6 @@ public class TextFileIE extends DataIE {
             }
         }
 
-        return modelBitmap;
+        return modelTextFile;
     }
 }

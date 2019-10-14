@@ -1,6 +1,7 @@
 package model;
 
 import javafx.scene.paint.Color;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -42,23 +43,35 @@ public class Cell {
         this.grain = grain;
     }
 
-    public void createNewGrain(){
+    public void createNewGrain(Color color) {
+        /*
+        TODO: dodać tą funkcję do wykonywania w nowym wątku
+         */
         float r, g, b;
-        Color color;
+        Color randomColor;
+        if (color == null) {
+            do {
+                r = ThreadLocalRandom.current().nextFloat();
+                g = ThreadLocalRandom.current().nextFloat();
+                b = ThreadLocalRandom.current().nextFloat();
 
-        do {
-            r = ThreadLocalRandom.current().nextFloat();
-            g = ThreadLocalRandom.current().nextFloat();
-            b = ThreadLocalRandom.current().nextFloat();
-
-            color = Color.color(r, g, b);
-        }while (!isGrainColorAvailable(color));
-        grain = new Grain(listOfGrains.size(), color);
-        listOfGrains.add(grain);
+                randomColor = Color.color(r, g, b);
+            } while (!isGrainColorAvailable(randomColor));
+            grain = new Grain(listOfGrains.size(), randomColor);
+            listOfGrains.add(grain);
+        } else {
+            if (!Grain.getTakenColors().contains(color)) {
+                grain = new Grain(listOfGrains.size(), color);
+                listOfGrains.add(grain);
+                Grain.getTakenColors().add(color);
+            } else {
+                grain = getGrainByColor(color);
+            }
+        }
         state = GRAIN;
     }
 
-    public void turnToGrain(int ID, CellState state, Color color, boolean onBorder){
+    public void turnToGrain(int ID, CellState state, Color color, boolean onBorder) {
         this.state = state;
         this.onBorder = onBorder;
         Grain holdGrain = getGrainByID(ID);
@@ -70,21 +83,29 @@ public class Cell {
         }
     }
 
-    private boolean isGrainColorAvailable(Color color){
-        if (Grain.restrictedColors.contains(color)){
+    private boolean isGrainColorAvailable(Color color) {
+        if (Grain.restrictedColors.contains(color)) {
             return false;
         }
 
-        for (Grain g : listOfGrains){
+        for (Grain g : listOfGrains) {
             if (g.getColor().equals(color))
                 return false;
         }
         return true;
     }
 
-    private Grain getGrainByID(int ID){
-        for (Grain g : listOfGrains){
+    private Grain getGrainByID(int ID) {
+        for (Grain g : listOfGrains) {
             if (g.getID() == ID)
+                return g;
+        }
+        return null;
+    }
+
+    private Grain getGrainByColor(Color color) {
+        for (Grain g : listOfGrains) {
+            if (g.getColor().equals(color))
                 return g;
         }
         return null;

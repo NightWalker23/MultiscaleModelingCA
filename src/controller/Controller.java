@@ -9,9 +9,7 @@ import javafx.scene.paint.Color;
 import model.Cell;
 import model.CellState;
 import model.DataIE.BitmapIE;
-import model.DataIE.DataIE;
 import model.DataIE.TextFileIE;
-import model.Grain;
 import model.Model;
 
 import java.net.URL;
@@ -31,7 +29,8 @@ public class Controller implements Initializable {
 
     private GraphicsContext gc;
     private Model model;
-    private DataIE dataIE;
+    private TextFileIE textFileIE;
+    private BitmapIE bitmapIE;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -41,28 +40,33 @@ public class Controller implements Initializable {
     }
 
     public void importDataFile(ActionEvent actionEvent) {
-        dataIE = TextFileIE.getInstance();
-        model = dataIE.importData();
-        setFieldsText();
-        cleanCanvas();
-        showGridOnCanvas();
+        textFileIE = TextFileIE.getInstance();
+        model = textFileIE.importData();
+        if (model != null) {
+            setFieldsText();
+            cleanCanvas();
+            showGridOnCanvas();
+        }
     }
 
     public void importBitmap(ActionEvent actionEvent) {
-        dataIE = BitmapIE.getInstance();
-        model = dataIE.importData();
-        setFieldsText();
-        cleanCanvas();
-        showGridOnCanvas();
+        bitmapIE = BitmapIE.getInstance();
+        model = bitmapIE.importData();
+        if (model != null) {
+            setFieldsText();
+            cleanCanvas();
+            showGridOnCanvas();
+        }
     }
 
     public void exportDataFile(ActionEvent actionEvent) {
-        dataIE = TextFileIE.getInstance();
-        dataIE.exportData(model);
+        textFileIE = TextFileIE.getInstance();
+        textFileIE.exportData(model);
     }
 
     public void exportBitmap(ActionEvent actionEvent) {
-        dataIE = BitmapIE.getInstance();
+        bitmapIE = BitmapIE.getInstance();
+        bitmapIE.exportData(model, canvas);
     }
 
     public void startNucleating(ActionEvent actionEvent) {
@@ -71,9 +75,9 @@ public class Controller implements Initializable {
         cleanCanvas();
         createNewModel();
 
-        if (model != null){
+        if (model != null) {
             numberOfGrains = readValueFromTextField(fieldGrains);
-            if (numberOfGrains >((int) canvas.getWidth() * (int) canvas.getHeight())){
+            if (numberOfGrains > ((int) canvas.getWidth() * (int) canvas.getHeight())) {
                 numberOfGrains = (int) canvas.getWidth() * (int) canvas.getHeight();
             }
             model.fillGridWIthGrains(numberOfGrains);
@@ -82,7 +86,7 @@ public class Controller implements Initializable {
     }
 
     public void startGrowth(ActionEvent actionEvent) {
-        if (model != null){
+        if (model != null) {
             model.startSimulation();
             model.determineBorders();
             showGridOnCanvas();
@@ -110,13 +114,13 @@ public class Controller implements Initializable {
         x = readValueFromTextField(fieldY);
         y = readValueFromTextField(fieldX);
 
-        if (x > (int)canvas.getWidth()) {
+        if (x > (int) canvas.getWidth()) {
             x = (int) canvas.getWidth();
         }
         if (x < 0) {
             x = 0;
         }
-        if (y > (int)canvas.getHeight()) {
+        if (y > (int) canvas.getHeight()) {
             y = (int) canvas.getHeight();
         }
         if (y < 0) {
@@ -128,13 +132,13 @@ public class Controller implements Initializable {
     }
 
     private void showGridOnCanvas() {
-        if (model != null){
+        if (model != null) {
             /*TODO:
                 przerzucić rysowanie do nowego wątku
             */
             Cell holdGrid[][] = model.getGrid();
-            for (int i = 0; i < model.getWidth(); i++){
-                for (int j = 0; j < model.getHeight(); j++){
+            for (int i = 0; i < model.getWidth(); i++) {
+                for (int j = 0; j < model.getHeight(); j++) {
                     Cell holdCell = holdGrid[i][j];
                     if (holdCell.getState().equals(CellState.GRAIN)) {
                         gc.setFill(holdCell.getGrain().getColor());
@@ -146,10 +150,10 @@ public class Controller implements Initializable {
         }
     }
 
-    private int readValueFromTextField(TextField field){
+    private int readValueFromTextField(TextField field) {
         int value = 0;
 
-        try{
+        try {
             value = Integer.parseInt(field.getText());
         } catch (NumberFormatException ignored) {
         }
@@ -157,9 +161,11 @@ public class Controller implements Initializable {
         return value;
     }
 
-    private void setFieldsText(){
-        fieldY.setText(String.valueOf(model.getHeight()));
-        fieldX.setText(String.valueOf(model.getWidth()));
+    private void setFieldsText() {
+        if (model != null) {
+            fieldY.setText(String.valueOf(model.getHeight()));
+            fieldX.setText(String.valueOf(model.getWidth()));
+        }
     }
 
 }

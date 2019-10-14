@@ -68,7 +68,7 @@ public class Model {
             for (int i = 0; i < numberOfGrainsToFill; i++) {
                 randomCell = ThreadLocalRandom.current().nextInt(0, numberOfAvailableCells);
                 Cell holdCell = listOfAvailableCells.get(randomCell);
-                holdCell.createNewGrain();
+                holdCell.createNewGrain(null);
                 listOfAvailableCells.remove(holdCell);
                 numberOfAvailableCells--;
             }
