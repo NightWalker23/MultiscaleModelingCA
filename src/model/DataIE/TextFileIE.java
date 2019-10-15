@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 
 public class TextFileIE {
 
@@ -100,6 +101,8 @@ public class TextFileIE {
                 }
 
                 br.close();
+                modelTextFile.determineBorders();
+                modelTextFile.setListOfAvailableCells(new ArrayList<>());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

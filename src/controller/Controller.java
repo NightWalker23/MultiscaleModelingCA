@@ -1,19 +1,21 @@
 package controller;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+import model.*;
 import model.Cell;
-import model.CellState;
 import model.DataIE.BitmapIE;
 import model.DataIE.TextFileIE;
-import model.Model;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import static model.InclusionTypes.*;
+import static model.CellState.*;
 
 public class Controller implements Initializable {
 
@@ -21,22 +23,37 @@ public class Controller implements Initializable {
     public Canvas canvas;
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
-    public TextField fieldGrains, fieldX, fieldY;//, fieldMCS, fieldInclusionsAmount, fieldPercent, fieldInclusionsSize;
-    //public RadioButton radioCA, radioMC;
-    public Button buttonGrowth, buttonNucleating, buttonClear;// buttonAddInclusions, buttonSelectAll, ;
-    //public CheckBox checkBoxShape, checkBoxSelectN, checkBoxSUB;
-    //public ChoiceBox choiceBoxInclusionsType;
+    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize;
+    public Button buttonGrowth, buttonNucleating, buttonClear;
+    public ChoiceBox<String> choiceBoxInclusionsType;
+    public Button buttonAddInclusions;
 
     private GraphicsContext gc;
     private Model model;
     private TextFileIE textFileIE;
     private BitmapIE bitmapIE;
+    private InclusionTypes inclusionsType;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         gc = canvas.getGraphicsContext2D();
         fieldX.setText(String.valueOf(500));
         fieldY.setText(String.valueOf(500));
+
+        String[] typeOfInclusions = new String[]{"Square", "Circle"};
+        choiceBoxInclusionsType.setItems(FXCollections.observableArrayList(typeOfInclusions));
+        choiceBoxInclusionsType.setValue("Square");
+        inclusionsType = SQUARE;
+        choiceBoxInclusionsType.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            switch (newValue.intValue()) {
+                case 0:
+                    inclusionsType = SQUARE;
+                    break;
+                case 1:
+                    inclusionsType = CIRCLE;
+                    break;
+            }
+        });
     }
 
     public void importDataFile(ActionEvent actionEvent) {
@@ -71,9 +88,19 @@ public class Controller implements Initializable {
 
     public void startNucleating(ActionEvent actionEvent) {
         int numberOfGrains;
+        int x, y;
+        x = readValueFromTextField(fieldY);
+        y = readValueFromTextField(fieldX);
 
         cleanCanvas();
-        createNewModel();
+        if (model != null){
+            if (model.getWidth() != y || model.getHeight() != x){
+                createNewModel();
+            }
+        } else {
+            createNewModel();
+        }
+
 
         if (model != null) {
             numberOfGrains = readValueFromTextField(fieldGrains);
@@ -99,9 +126,13 @@ public class Controller implements Initializable {
     }
 
     public void startAddInclusions(ActionEvent actionEvent) {
-    }
-
-    public void startSelectAll(ActionEvent actionEvent) {
+        int amount = readValueFromTextField(fieldInclusionsAmount);
+        int radius = readValueFromTextField(fieldInclusionsSize);
+        if (model == null){
+            createNewModel();
+        }
+        model.addInclusions(inclusionsType, amount, radius);
+        showGridOnCanvas();
     }
 
     private void cleanCanvas() {
@@ -140,9 +171,12 @@ public class Controller implements Initializable {
             for (int i = 0; i < model.getWidth(); i++) {
                 for (int j = 0; j < model.getHeight(); j++) {
                     Cell holdCell = holdGrid[i][j];
-                    if (holdCell.getState().equals(CellState.GRAIN)) {
+                    if (holdCell.getState().equals(GRAIN)) {
                         gc.setFill(holdCell.getGrain().getColor());
 //                        if (holdCell.isOnBorder()) gc.setFill(Grain.BORDER_COLOR);    //do rysowania krawędzi
+                        gc.fillRect(i, j, 1, 1);
+                    } else if (holdCell.getState().equals(INCLUSION)){
+                        gc.setFill(Grain.INCLUSION_COLOR);
                         gc.fillRect(i, j, 1, 1);
                     }
                 }

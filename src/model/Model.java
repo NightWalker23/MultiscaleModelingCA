@@ -1,17 +1,17 @@
 package model;
 
-import javafx.scene.paint.Color;
-
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static model.CellState.*;
+import static model.InclusionTypes.*;
 
 public class Model {
     private int width, height;
     private Cell[][] grid;
     private List<Cell> listOfCells;
     private List<Cell> listOfAvailableCells;
+    private List<Cell> listOfCellsOnBorder;
 
     private class Indexes {
         public int i, j, iG, iD, jL, jR;
@@ -23,6 +23,7 @@ public class Model {
         this.height = height;
         this.listOfCells = new ArrayList<>();
         this.listOfAvailableCells = new ArrayList<>();
+        this.listOfCellsOnBorder = new ArrayList<>();
 
         createEmptyGrid();
     }
@@ -47,12 +48,16 @@ public class Model {
         return height;
     }
 
+    public void setListOfAvailableCells(List<Cell> listOfAvailableCells) {
+        this.listOfAvailableCells = listOfAvailableCells;
+    }
+
     private void createEmptyGrid() {
         Cell holdCell;
         if (grid != null && listOfCells != null && listOfAvailableCells != null) {
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
-                    holdCell = new Cell();
+                    holdCell = new Cell(new Coordinates(i, j));
                     grid[i][j] = holdCell;
                     listOfCells.add(holdCell);
                     listOfAvailableCells.add(holdCell);
@@ -96,6 +101,9 @@ public class Model {
                 } else if (frameCell.getState() == GRAIN) {
                     tmpCell.setState(GRAIN);
                     tmpCell.setGrain(frame[i][j].getGrain());
+                } else if (frameCell.getState() == INCLUSION) {
+                    tmpCell.setState(INCLUSION);
+                    tmpCell.setGrain(null);
                 }
             }
         }
@@ -120,7 +128,7 @@ public class Model {
         Cell[][] tmp = new Cell[width][height];
         for (int i = 0; i < width; i++)
             for (int j = 0; j < height; j++)
-                tmp[i][j] = new Cell();
+                tmp[i][j] = new Cell(new Coordinates(i, j));
 
         return tmp;
     }
@@ -136,20 +144,21 @@ public class Model {
         indexes.i = i;
         indexes.j = j;
 
+        //periodic type of edge
         if (i == 0)
-            indexes.iG = -1;
+            indexes.iG = getWidth() - 1;
         else indexes.iG = i - 1;
 
         if (i == this.width - 1)
-            indexes.iD = -1;
+            indexes.iD = 0;
         else indexes.iD = i + 1;
 
         if (j == 0)
-            indexes.jL = -1;
+            indexes.jL = getHeight() - 1;
         else indexes.jL = j - 1;
 
         if (j == this.height - 1)
-            indexes.jR = -1;
+            indexes.jR = 0;
         else indexes.jR = j + 1;
 
         return indexes;
@@ -168,49 +177,65 @@ public class Model {
         if (indexes.iG != -1 && indexes.jL != -1)
             if (frame[indexes.iG][indexes.jL].getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.jL].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         if (indexes.iG != -1)
             if (frame[indexes.iG][indexes.j].getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.j].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         if (indexes.iG != -1 && indexes.jR != -1)
             if (frame[indexes.iG][indexes.jR].getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.jR].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         if (indexes.jL != -1)
             if (frame[indexes.i][indexes.jL].getState() == GRAIN) {
                 grain = frame[indexes.i][indexes.jL].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         if (indexes.jR != -1)
             if (frame[indexes.i][indexes.jR].getState() == GRAIN) {
                 grain = frame[indexes.i][indexes.jR].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         if (indexes.iD != -1 && indexes.jL != -1)
             if (frame[indexes.iD][indexes.jL].getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.jL].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         if (indexes.iD != -1)
             if (frame[indexes.iD][indexes.j].getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.j].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         if (indexes.iD != -1 && indexes.jR != -1)
             if (frame[indexes.iD][indexes.jR].getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.jR].getGrain();
-                fillMap(grain, neighboursMap);
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
             }
 
         return neighboursMap;
@@ -225,7 +250,7 @@ public class Model {
         Map.Entry<Grain, Integer> maxEntry = null;
 
         for (Map.Entry<Grain, Integer> entry : grainMap.entrySet())
-            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0 && entry.getKey().getID() != -1)
                 maxEntry = entry;
 
         Grain grain = null;
@@ -246,6 +271,7 @@ public class Model {
     }
 
     public void determineBorders() {
+        listOfCellsOnBorder = new ArrayList<>();
         boolean onBorder;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -253,13 +279,126 @@ public class Model {
                 Indexes indexes = determineIndexes(i, j);
                 Map<Grain, Integer> grainMap = createNeighboursMap(grid, indexes);
                 for (Map.Entry<Grain, Integer> entry : grainMap.entrySet()) {
-                    if (entry.getKey().getID() != grid[i][j].getGrain().getID()) {
-                        onBorder = true;
-                        break;
+                    if (grid[i][j].getGrain() != null) {
+                        if (entry.getKey().getID() != grid[i][j].getGrain().getID()) {
+                            onBorder = true;
+                            break;
+                        }
                     }
                 }
                 grid[i][j].setOnBorder(onBorder);
+                if (onBorder){
+                    listOfCellsOnBorder.add(grid[i][j]);
+                }
             }
         }
+    }
+
+    public void addInclusions(InclusionTypes iType, int amount, int radius){
+        if (amount <= listOfCellsOnBorder.size() || listOfAvailableCells.size() != 0) {
+            int randX, randY, randCell;
+            Cell holdCell;
+            for (int i = 0; i < amount; i++) {
+                if (listOfAvailableCells.size() == 0) {
+                    randCell = ThreadLocalRandom.current().nextInt(0, listOfCellsOnBorder.size());
+                    holdCell = listOfCellsOnBorder.get(randCell);
+                    createInclusion(holdCell.getCords().y, holdCell.getCords().x, radius, iType);
+                    listOfCellsOnBorder.remove(holdCell);
+                } else {
+                    randX = ThreadLocalRandom.current().nextInt(0, height);
+                    randY = ThreadLocalRandom.current().nextInt(0, width);
+                    createInclusion(randX, randY, radius, iType);
+                }
+            }
+        }
+    }
+
+    private Coordinates getUp(int x, int y, int range) {
+        int cx = x, cy = y;
+
+        for (int i = 0; i < range; i++) {
+            if (cx == 0)
+                cx = getHeight() - 1;
+            else cx--;
+        }
+
+        return new Coordinates(cx, cy);
+    }
+
+    private Coordinates getDown(int x, int y, int range) {
+        int cx = x, cy = y;
+
+        for (int i = 0; i < range; i++) {
+            if (cx == getHeight() - 1)
+                cx = 0;
+            else cx++;
+        }
+
+        return new Coordinates(cx, cy);
+    }
+
+    private Coordinates getLeft(int x, int y, int range) {
+        int cx = x, cy = y;
+
+        for (int i = 0; i < range; i++) {
+            if (cy == 0)
+                cy = getWidth() - 1;
+            else cy--;
+        }
+
+        return new Coordinates(cx, cy);
+    }
+
+    private Coordinates getRight(int x, int y, int range) {
+        int cx = x, cy = y;
+
+        for (int i = 0; i < range; i++) {
+            if (cy == getWidth() - 1)
+                cy = 0;
+            else cy++;
+        }
+
+        return new Coordinates(cx, cy);
+    }
+
+    private void createInclusion(int x, int y, int radius, InclusionTypes iType) {
+        int circleX = 0, circleY = 0;
+
+        Coordinates middleCell = new Coordinates(0, 0);
+
+        Coordinates startCell = new Coordinates(x, y);
+        startCell = getLeft(startCell.x, startCell.y, radius);
+        circleX -= radius;
+        startCell = getUp(startCell.x, startCell.y, radius);
+        circleY += radius;
+
+        Coordinates tmpCell = new Coordinates(startCell.x, startCell.y);
+
+        for (int i = 0; i < 2 * radius + 1; i++) {
+            for (int j = 0; j < 2 * radius + 1; j++) {
+                if (iType.equals(CIRCLE) && getDistanceBetweenCells(middleCell, new Coordinates(circleX, circleY)) <= radius){
+                    turnToInclusion(tmpCell);
+                } else if (iType == SQUARE) {
+                    turnToInclusion(tmpCell);
+                }
+                tmpCell = getRight(tmpCell.x, tmpCell.y, 1);
+                circleX += 1;
+            }
+            tmpCell = getLeft(tmpCell.x, tmpCell.y, 2 * radius + 1);
+            circleX -= 2 * radius + 1;
+            tmpCell = getDown(tmpCell.x, tmpCell.y, 1);
+            circleY -= 1;
+        }
+    }
+
+    private void turnToInclusion(Coordinates tmpCell){
+        grid[tmpCell.y][tmpCell.x].setState(INCLUSION);
+        grid[tmpCell.y][tmpCell.x].setGrain(new Grain(-1, Grain.INCLUSION_COLOR));
+        grid[tmpCell.y][tmpCell.x].setOnBorder(false);
+        listOfAvailableCells.remove(grid[tmpCell.y][tmpCell.x]);
+    }
+
+    private double getDistanceBetweenCells(Coordinates startCell, Coordinates tmpCell){
+        return (Math.sqrt( Math.pow(tmpCell.x - startCell.x, 2) + Math.pow(tmpCell.y - startCell.y, 2) ));
     }
 }

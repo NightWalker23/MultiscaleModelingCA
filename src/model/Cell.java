@@ -13,10 +13,12 @@ public class Cell {
     private Grain grain;
     private CellState state;
     private boolean onBorder;
+    private Coordinates cords;
 
-    public Cell() {
+    public Cell(Coordinates cords) {
         state = EMPTY;
         grain = null;
+        this.cords = cords;
     }
 
     public CellState getState() {
@@ -43,6 +45,10 @@ public class Cell {
         this.grain = grain;
     }
 
+    public Coordinates getCords() {
+        return cords;
+    }
+
     public void createNewGrain(Color color) {
         /*
         TODO: dodać tą funkcję do wykonywania w nowym wątku
@@ -60,11 +66,14 @@ public class Cell {
             grain = new Grain(listOfGrains.size(), randomColor);
             listOfGrains.add(grain);
         } else {
-            if (!Grain.getTakenColors().contains(color)) {
+            if (!Grain.getTakenColors().contains(color) && !Grain.restrictedColors.contains(color)) {
                 grain = new Grain(listOfGrains.size(), color);
                 listOfGrains.add(grain);
                 Grain.getTakenColors().add(color);
-            } else {
+            } else if (Grain.restrictedColors.contains(color)){
+                grain = new Grain(-1, color);
+            }
+            else {
                 grain = getGrainByColor(color);
             }
         }
