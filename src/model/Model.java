@@ -103,7 +103,7 @@ public class Model {
                     tmpCell.setGrain(frame[i][j].getGrain());
                 } else if (frameCell.getState() == INCLUSION) {
                     tmpCell.setState(INCLUSION);
-                    tmpCell.setGrain(null);
+                    tmpCell.setGrain(frame[i][j].getGrain());
                 }
             }
         }
@@ -250,7 +250,7 @@ public class Model {
         Map.Entry<Grain, Integer> maxEntry = null;
 
         for (Map.Entry<Grain, Integer> entry : grainMap.entrySet())
-            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0 && entry.getKey().getID() != -1)
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0 && entry.getKey().getID() >= 0)
                 maxEntry = entry;
 
         Grain grain = null;
@@ -367,27 +367,49 @@ public class Model {
         Coordinates middleCell = new Coordinates(0, 0);
 
         Coordinates startCell = new Coordinates(x, y);
-        startCell = getLeft(startCell.x, startCell.y, radius);
-        circleX -= radius;
-        startCell = getUp(startCell.x, startCell.y, radius);
-        circleY += radius;
 
-        Coordinates tmpCell = new Coordinates(startCell.x, startCell.y);
+        if (iType == CIRCLE){
+            radius -= 1;
+            startCell = getLeft(startCell.x, startCell.y, radius);
+            circleX -= radius;
+            startCell = getUp(startCell.x, startCell.y, radius);
+            circleY += radius;
 
-        for (int i = 0; i < 2 * radius + 1; i++) {
-            for (int j = 0; j < 2 * radius + 1; j++) {
-                if (iType.equals(CIRCLE) && getDistanceBetweenCells(middleCell, new Coordinates(circleX, circleY)) <= radius){
-                    turnToInclusion(tmpCell);
-                } else if (iType == SQUARE) {
-                    turnToInclusion(tmpCell);
+            Coordinates tmpCell = new Coordinates(startCell.x, startCell.y);
+
+            for (int i = 0; i < 2 * radius + 1; i++) {
+                for (int j = 0; j < 2 * radius + 1; j++) {
+                    if (getDistanceBetweenCells(middleCell, new Coordinates(circleX, circleY)) <= radius){
+                        turnToInclusion(tmpCell);
+                    }
+                    tmpCell = getRight(tmpCell.x, tmpCell.y, 1);
+                    circleX += 1;
                 }
-                tmpCell = getRight(tmpCell.x, tmpCell.y, 1);
-                circleX += 1;
+                tmpCell = getLeft(tmpCell.x, tmpCell.y, 2 * radius + 1);
+                circleX -= 2 * radius + 1;
+                tmpCell = getDown(tmpCell.x, tmpCell.y, 1);
+                circleY -= 1;
             }
-            tmpCell = getLeft(tmpCell.x, tmpCell.y, 2 * radius + 1);
-            circleX -= 2 * radius + 1;
-            tmpCell = getDown(tmpCell.x, tmpCell.y, 1);
-            circleY -= 1;
+        } else if (iType == SQUARE){
+            int a = (int) (Math.ceil(radius / Math.sqrt(2)));
+            startCell = getLeft(startCell.x, startCell.y, a/2);
+            circleX -= a/2;
+            startCell = getUp(startCell.x, startCell.y, a/2);
+            circleY += a/2;
+
+            Coordinates tmpCell = new Coordinates(startCell.x, startCell.y);
+
+            for (int i = 0; i < a; i++) {
+                for (int j = 0; j < a; j++) {
+                    turnToInclusion(tmpCell);
+                    tmpCell = getRight(tmpCell.x, tmpCell.y, 1);
+                    circleX += 1;
+                }
+                tmpCell = getLeft(tmpCell.x, tmpCell.y, a);
+                circleX -= a;
+                tmpCell = getDown(tmpCell.x, tmpCell.y, 1);
+                circleY -= 1;
+            }
         }
     }
 
