@@ -12,6 +12,7 @@ public class Model {
     private List<Cell> listOfCells;
     private List<Cell> listOfAvailableCells;
     private List<Cell> listOfCellsOnBorder;
+    private List<Grain> listOfSelectedGrains;
 
     private class Indexes {
         public int i, j, iG, iD, jL, jR;
@@ -29,11 +30,13 @@ public class Model {
 
     public Model(int width, int height) {
         this.grid = new Cell[width][height];
+        Cell.resetlistOfGrains();
         this.width = width;
         this.height = height;
         this.listOfCells = new ArrayList<>();
         this.listOfAvailableCells = new ArrayList<>();
         this.listOfCellsOnBorder = new ArrayList<>();
+        this.listOfSelectedGrains = new ArrayList<>();
 
         createEmptyGrid();
     }
@@ -60,6 +63,14 @@ public class Model {
 
     public void setListOfAvailableCells(List<Cell> listOfAvailableCells) {
         this.listOfAvailableCells = listOfAvailableCells;
+    }
+
+    public List<Grain> getListOfSelectedGrains() {
+        return listOfSelectedGrains;
+    }
+
+    public void setListOfSelectedGrains(List<Grain> listOfSelectedGrains) {
+        this.listOfSelectedGrains = listOfSelectedGrains;
     }
 
     private void createEmptyGrid() {
@@ -536,5 +547,27 @@ public class Model {
 
     private double getDistanceBetweenCells(Coordinates startCell, Coordinates tmpCell){
         return (Math.sqrt( Math.pow(tmpCell.x - startCell.x, 2) + Math.pow(tmpCell.y - startCell.y, 2) ));
+    }
+
+    public void addRemoveSelectedGrain(int x, int y){
+        Grain selectedGrain = grid[x][y].getGrain();
+
+        if (selectedGrain != null && listOfSelectedGrains != null) {
+            if (selectedGrain.getID() >= 0) {
+                if (listOfSelectedGrains.contains(selectedGrain)) {
+                    listOfSelectedGrains.remove(selectedGrain);
+                } else {
+                    listOfSelectedGrains.add(selectedGrain);
+                }
+
+                //for tests
+                for (Grain el : listOfSelectedGrains) { /////
+                    if (el != null) {
+                        System.out.print(el.getID() + " ");
+                    }
+                }
+                System.out.println(); /////
+            }
+        }
     }
 }

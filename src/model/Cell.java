@@ -45,6 +45,10 @@ public class Cell {
         this.grain = grain;
     }
 
+    public static void resetlistOfGrains(){
+        listOfGrains = new ArrayList<>();
+    }
+
     public Coordinates getCords() {
         return cords;
     }

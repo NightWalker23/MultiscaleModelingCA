@@ -6,6 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import model.*;
 import model.Cell;
@@ -207,4 +208,16 @@ public class Controller implements Initializable {
         }
     }
 
+    public void clickCanvas(MouseEvent mouseEvent) {
+        int x0 = 1, y0 = 25; //współrzędne początka canvasa w okienku
+        //współrzędne w okienku
+        int x = (int) mouseEvent.getSceneX() - x0;
+        int y = (int) mouseEvent.getSceneY() - y0;
+
+        if (model != null){
+            if (x > 0 && x < model.getWidth() && y > 0 && y < model.getHeight()){
+                model.addRemoveSelectedGrain(x, y);
+            }
+        }
+    }
 }

@@ -18,7 +18,7 @@
    <children>
       <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="700.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
          <children>
-            <Canvas fx:id="canvas" height="500.0" layoutY="25.0" width="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0" />
+            <Canvas fx:id="canvas" height="500.0" layoutY="25.0" onMouseClicked="#clickCanvas" width="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0" />
             <VBox prefHeight="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
                   <MenuBar fx:id="menuBar" VBox.vgrow="ALWAYS">
