@@ -60,6 +60,8 @@
             <Label layoutX="510.0" layoutY="233.0" text="Type of inclusions" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="233.0" />
             <ChoiceBox fx:id="choiceBoxInclusionsType" layoutX="628.0" layoutY="229.0" prefHeight="25.0" prefWidth="66.0" AnchorPane.leftAnchor="628.0" AnchorPane.topAnchor="229.0" />
             <Button fx:id="buttonAddInclusions" layoutX="510.0" layoutY="263.0" mnemonicParsing="false" onAction="#startAddInclusions" text="Add inclusions" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="263.0" />
+            <TextField fx:id="fieldProbabilityToChange" layoutX="525.0" layoutY="307.0" prefHeight="25.0" prefWidth="66.0" AnchorPane.leftAnchor="525.0" AnchorPane.topAnchor="307.0" />
+            <Label layoutX="510.0" layoutY="311.0" text="\%" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="311.0" />
          </children>
       </AnchorPane>
    </children>

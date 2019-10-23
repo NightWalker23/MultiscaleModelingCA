@@ -17,6 +17,16 @@ public class Model {
         public int i, j, iG, iD, jL, jR;
     }
 
+    private class MooreRules{
+        public Grain grain;
+        public int quantity;
+
+        public MooreRules(Grain grain, int quantity) {
+            this.grain = grain;
+            this.quantity = quantity;
+        }
+    }
+
     public Model(int width, int height) {
         this.grid = new Cell[width][height];
         this.width = width;
@@ -80,13 +90,13 @@ public class Model {
         }
     }
 
-    public void startSimulation() {
+    public void startSimulation(int probabilityToChange) {
         while (listOfAvailableCells.size() != 0) {
-            process(grid);
+            process(grid, probabilityToChange);
         }
     }
 
-    public void process(Cell[][] frame) {
+    public void process(Cell[][] frame, int probabilityToChange) {
         Cell[][] tmp = getTmp();
         Cell frameCell, tmpCell;
         for (int i = 0; i < width; i++) {
@@ -94,7 +104,7 @@ public class Model {
                 frameCell = frame[i][j];
                 tmpCell = tmp[i][j];
                 if (frameCell.getState() == EMPTY) {
-                    tmpCell.setGrain(determineState(frame, i, j));
+                    tmpCell.setGrain(determineState(frame, i, j, probabilityToChange));
                     if (tmpCell.getGrain() != null) {
                         tmpCell.setState(GRAIN);
                     }
@@ -133,10 +143,10 @@ public class Model {
         return tmp;
     }
 
-    private Grain determineState(Cell[][] frame, int height, int width) {
+    private Grain determineState(Cell[][] frame, int height, int width, int probabilityToChange) {
         Indexes indexes = determineIndexes(height, width);
 
-        return moore(frame, indexes);
+        return getNewState(frame, indexes, probabilityToChange);
     }
 
     private Indexes determineIndexes(int i, int j) {
@@ -164,13 +174,38 @@ public class Model {
         return indexes;
     }
 
-    private Grain moore(Cell[][] frame, Indexes indexes) {
-        Map<Grain, Integer> grainMap = createNeighboursMap(frame, indexes);
+    private Grain getNewState(Cell[][] frame, Indexes indexes, int probabilityToChange) {
+        Map<Grain, Integer> grainMap = createNeighboursMapMoore(frame, indexes);
+        MooreRules mr = getGrainMaxNeighbour(grainMap);
+        int randomNumber;
 
-        return getGrainMaxNeighbour(grainMap);
+        if (mr.quantity >= 5){
+            return mr.grain;
+        } else{
+            grainMap = createNeighboursMapNearestMoore(frame, indexes);
+            mr = getGrainMaxNeighbour(grainMap);
+            if (mr.quantity >= 3){
+                return mr.grain;
+            } else {
+                grainMap = createNeighboursMapFurtherMoore(frame, indexes);
+                mr = getGrainMaxNeighbour(grainMap);
+                if (mr.quantity >= 3){
+                    return mr.grain;
+                } else {
+                    grainMap = createNeighboursMapMoore(frame, indexes);
+                    mr = getGrainMaxNeighbour(grainMap);
+                    randomNumber = ThreadLocalRandom.current().nextInt(1, 100);
+                    if (randomNumber <= probabilityToChange){
+                        return mr.grain;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
-    private Map<Grain, Integer> createNeighboursMap(Cell[][] frame, Indexes indexes) {
+    private Map<Grain, Integer> createNeighboursMapMoore(Cell[][] frame, Indexes indexes) {
         Map<Grain, Integer> neighboursMap = new HashMap<>();
         Grain grain = null;
 
@@ -241,13 +276,92 @@ public class Model {
         return neighboursMap;
     }
 
+    private Map<Grain, Integer> createNeighboursMapNearestMoore(Cell[][] frame, Indexes indexes) {
+        Map<Grain, Integer> neighboursMap = new HashMap<>();
+        Grain grain = null;
+
+        if (indexes.iG != -1)
+            if (frame[indexes.iG][indexes.j].getState() == GRAIN) {
+                grain = frame[indexes.iG][indexes.j].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        if (indexes.jL != -1)
+            if (frame[indexes.i][indexes.jL].getState() == GRAIN) {
+                grain = frame[indexes.i][indexes.jL].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        if (indexes.jR != -1)
+            if (frame[indexes.i][indexes.jR].getState() == GRAIN) {
+                grain = frame[indexes.i][indexes.jR].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        if (indexes.iD != -1)
+            if (frame[indexes.iD][indexes.j].getState() == GRAIN) {
+                grain = frame[indexes.iD][indexes.j].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        return neighboursMap;
+    }
+
+    private Map<Grain, Integer> createNeighboursMapFurtherMoore(Cell[][] frame, Indexes indexes) {
+        Map<Grain, Integer> neighboursMap = new HashMap<>();
+        Grain grain = null;
+
+        if (indexes.iG != -1 && indexes.jL != -1)
+            if (frame[indexes.iG][indexes.jL].getState() == GRAIN) {
+                grain = frame[indexes.iG][indexes.jL].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        if (indexes.iG != -1 && indexes.jR != -1)
+            if (frame[indexes.iG][indexes.jR].getState() == GRAIN) {
+                grain = frame[indexes.iG][indexes.jR].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        if (indexes.iD != -1 && indexes.jL != -1)
+            if (frame[indexes.iD][indexes.jL].getState() == GRAIN) {
+                grain = frame[indexes.iD][indexes.jL].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        if (indexes.iD != -1 && indexes.jR != -1)
+            if (frame[indexes.iD][indexes.jR].getState() == GRAIN) {
+                grain = frame[indexes.iD][indexes.jR].getGrain();
+                if (grain != null) {
+                    fillMap(grain, neighboursMap);
+                }
+            }
+
+        return neighboursMap;
+    }
+
     private void fillMap(Grain grain, Map<Grain, Integer> grainMap) {
         if (grainMap.containsKey(grain)) grainMap.put(grain, grainMap.get(grain) + 1);
         else grainMap.put(grain, 1);
     }
 
-    private Grain getGrainMaxNeighbour(Map<Grain, Integer> grainMap) {
+    private MooreRules getGrainMaxNeighbour(Map<Grain, Integer> grainMap) {
         Map.Entry<Grain, Integer> maxEntry = null;
+        int max = 0;
 
         for (Map.Entry<Grain, Integer> entry : grainMap.entrySet())
             if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0 && entry.getKey().getID() >= 0)
@@ -255,7 +369,7 @@ public class Model {
 
         Grain grain = null;
         if (maxEntry != null) {
-            int max = maxEntry.getValue();
+            max = maxEntry.getValue();
 
             List<Grain> listMax = new ArrayList<>();
             for (Map.Entry<Grain, Integer> entry : grainMap.entrySet())
@@ -267,7 +381,7 @@ public class Model {
             grain = listMax.get(randWinner);
         }
 
-        return grain;
+        return new MooreRules(grain, max);
     }
 
     public void determineBorders() {
@@ -277,7 +391,7 @@ public class Model {
             for (int j = 0; j < height; j++) {
                 onBorder = false;
                 Indexes indexes = determineIndexes(i, j);
-                Map<Grain, Integer> grainMap = createNeighboursMap(grid, indexes);
+                Map<Grain, Integer> grainMap = createNeighboursMapMoore(grid, indexes);
                 for (Map.Entry<Grain, Integer> entry : grainMap.entrySet()) {
                     if (grid[i][j].getGrain() != null) {
                         if (entry.getKey().getID() != grid[i][j].getGrain().getID()) {

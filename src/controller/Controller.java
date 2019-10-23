@@ -23,7 +23,7 @@ public class Controller implements Initializable {
     public Canvas canvas;
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
-    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize;
+    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange;
     public Button buttonGrowth, buttonNucleating, buttonClear;
     public ChoiceBox<String> choiceBoxInclusionsType;
     public Button buttonAddInclusions;
@@ -39,6 +39,7 @@ public class Controller implements Initializable {
         gc = canvas.getGraphicsContext2D();
         fieldX.setText(String.valueOf(500));
         fieldY.setText(String.valueOf(500));
+        fieldProbabilityToChange.setText(String.valueOf(100));
 
         String[] typeOfInclusions = new String[]{"Square", "Circle"};
         choiceBoxInclusionsType.setItems(FXCollections.observableArrayList(typeOfInclusions));
@@ -113,10 +114,14 @@ public class Controller implements Initializable {
     }
 
     public void startGrowth(ActionEvent actionEvent) {
-        if (model != null) {
-            model.startSimulation();
-            model.determineBorders();
-            showGridOnCanvas();
+        int probabilityToChange = readValueFromTextField(fieldProbabilityToChange);
+
+        if (probabilityToChange > 0) {
+            if (model != null) {
+                model.startSimulation(probabilityToChange);
+                model.determineBorders();
+                showGridOnCanvas();
+            }
         }
     }
 
