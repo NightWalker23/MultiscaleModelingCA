@@ -21,6 +21,10 @@ public class Cell {
         this.cords = cords;
     }
 
+    public static List<Grain> getListOfGrains() {
+        return listOfGrains;
+    }
+
     public CellState getState() {
         return state;
     }
@@ -45,7 +49,7 @@ public class Cell {
         this.grain = grain;
     }
 
-    public static void resetlistOfGrains(){
+    public static void resetListOfGrains(){
         listOfGrains = new ArrayList<>();
     }
 

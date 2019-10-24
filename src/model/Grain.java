@@ -7,15 +7,19 @@ import java.util.List;
 
 public class Grain {
     private int ID;
+    public static int INCLUSION_ID = -1;
+    public static int DUAL_PHASE_ID = -2;
+    private boolean frozen;
+
     private Color color;
     public static Color INCLUSION_COLOR = Color.BLACK;
-    public static Color MARTENSITE_COLOR = Color.RED;
+    public static Color DUAL_PHASE_COLOR = Color.RED;
     public static Color BORDER_COLOR = Color.BLACK;
     public static Color BACKGROUND_COLOR = Color.WHITE;
 
     public static List<Color> restrictedColors = new ArrayList<Color>() {{
         add(INCLUSION_COLOR);   //inclusions color
-        add(MARTENSITE_COLOR);     //martensite color
+        add(DUAL_PHASE_COLOR);     //dual phase color
         add(BACKGROUND_COLOR);
         add(BORDER_COLOR);
     }};
@@ -28,14 +32,31 @@ public class Grain {
         if (!takenColors.contains(color)) {
             takenColors.add(color);
         }
+        frozen = false;
+    }
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
     }
 
     public int getID() {
         return ID;
     }
 
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+
     public Color getColor() {
         return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     public static List<Color> getTakenColors() {

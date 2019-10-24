@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import static model.InclusionTypes.*;
 import static model.CellState.*;
+import static model.StructureTypes.*;
 
 public class Controller implements Initializable {
 
@@ -25,15 +26,16 @@ public class Controller implements Initializable {
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
     public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange;
-    public Button buttonGrowth, buttonNucleating, buttonClear;
-    public ChoiceBox<String> choiceBoxInclusionsType;
-    public Button buttonAddInclusions;
+    public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonStructureStart;
+    public ChoiceBox<String> choiceBoxInclusionsType, choiceBoxStructureType;
+    public CheckBox checkBoxNewGrowth;
 
     private GraphicsContext gc;
     private Model model;
     private TextFileIE textFileIE;
     private BitmapIE bitmapIE;
     private InclusionTypes inclusionsType;
+    private StructureTypes structureTypes;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,6 +58,23 @@ public class Controller implements Initializable {
                     break;
             }
         });
+
+        String[] typeOfStructures = new String[]{"Substructure", "Dual phase"};
+        choiceBoxStructureType.setItems(FXCollections.observableArrayList(typeOfStructures));
+        choiceBoxStructureType.setValue("Substructure");
+        structureTypes = SUBSTRUCTURE;
+        choiceBoxStructureType.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            switch (newValue.intValue()) {
+                case 0:
+                    structureTypes = SUBSTRUCTURE;
+                    break;
+                case 1:
+                    structureTypes = DUAL_PHASE;
+                    break;
+            }
+        });
+
+        checkBoxNewGrowth.setSelected(false);
     }
 
     public void importDataFile(ActionEvent actionEvent) {
@@ -117,9 +136,15 @@ public class Controller implements Initializable {
     public void startGrowth(ActionEvent actionEvent) {
         int probabilityToChange = readValueFromTextField(fieldProbabilityToChange);
 
-        if (probabilityToChange > 0) {
-            if (model != null) {
-                model.startSimulation(probabilityToChange);
+        if (model != null) {
+            if (checkBoxNewGrowth.isSelected()){
+                if (probabilityToChange > 0) {
+                    model.startSimulation(probabilityToChange, true);
+                    model.determineBorders();
+                    showGridOnCanvas();
+                }
+            } else {
+                model.startSimulation(probabilityToChange, false);
                 model.determineBorders();
                 showGridOnCanvas();
             }
@@ -218,6 +243,21 @@ public class Controller implements Initializable {
             if (x > 0 && x < model.getWidth() && y > 0 && y < model.getHeight()){
                 model.addRemoveSelectedGrain(x, y);
             }
+        }
+    }
+
+    public void startStructure(ActionEvent actionEvent) {
+        int probabilityToChange = readValueFromTextField(fieldProbabilityToChange);
+        int numberOfGrains = readValueFromTextField(fieldGrains);
+        boolean type = checkBoxNewGrowth.isSelected();
+
+        if (model != null){
+            if (model.getListOfSelectedGrains().size() > 0){
+                if (probabilityToChange > 0) {
+                    model.startStructure(structureTypes, type, probabilityToChange, numberOfGrains);
+                }
+            }
+            showGridOnCanvas();
         }
     }
 }

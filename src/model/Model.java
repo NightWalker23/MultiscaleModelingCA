@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static model.CellState.*;
 import static model.InclusionTypes.*;
+import static model.StructureTypes.*;
 
 public class Model {
     private int width, height;
@@ -18,7 +19,7 @@ public class Model {
         public int i, j, iG, iD, jL, jR;
     }
 
-    private class MooreRules{
+    private class MooreRules {
         public Grain grain;
         public int quantity;
 
@@ -30,7 +31,7 @@ public class Model {
 
     public Model(int width, int height) {
         this.grid = new Cell[width][height];
-        Cell.resetlistOfGrains();
+        Cell.resetListOfGrains();
         this.width = width;
         this.height = height;
         this.listOfCells = new ArrayList<>();
@@ -101,13 +102,13 @@ public class Model {
         }
     }
 
-    public void startSimulation(int probabilityToChange) {
+    public void startSimulation(int probabilityToChange, boolean type) {
         while (listOfAvailableCells.size() != 0) {
-            process(grid, probabilityToChange);
+            process(grid, probabilityToChange, type);
         }
     }
 
-    public void process(Cell[][] frame, int probabilityToChange) {
+    public void process(Cell[][] frame, int probabilityToChange, boolean type) {
         Cell[][] tmp = getTmp();
         Cell frameCell, tmpCell;
         for (int i = 0; i < width; i++) {
@@ -115,7 +116,7 @@ public class Model {
                 frameCell = frame[i][j];
                 tmpCell = tmp[i][j];
                 if (frameCell.getState() == EMPTY) {
-                    tmpCell.setGrain(determineState(frame, i, j, probabilityToChange));
+                    tmpCell.setGrain(determineState(frame, i, j, probabilityToChange, type));
                     if (tmpCell.getGrain() != null) {
                         tmpCell.setState(GRAIN);
                     }
@@ -154,10 +155,13 @@ public class Model {
         return tmp;
     }
 
-    private Grain determineState(Cell[][] frame, int height, int width, int probabilityToChange) {
+    private Grain determineState(Cell[][] frame, int height, int width, int probabilityToChange, boolean type) {
         Indexes indexes = determineIndexes(height, width);
 
-        return getNewState(frame, indexes, probabilityToChange);
+        if (type)
+            return getNewState(frame, indexes, probabilityToChange);
+        else
+            return getClassicNewState(frame, indexes);
     }
 
     private Indexes determineIndexes(int i, int j) {
@@ -185,28 +189,35 @@ public class Model {
         return indexes;
     }
 
+    private Grain getClassicNewState(Cell[][] frame, Indexes indexes) {
+        Map<Grain, Integer> grainMap = createNeighboursMapMoore(frame, indexes);
+        MooreRules mr = getGrainMaxNeighbour(grainMap);
+
+        return mr.grain;
+    }
+
     private Grain getNewState(Cell[][] frame, Indexes indexes, int probabilityToChange) {
         Map<Grain, Integer> grainMap = createNeighboursMapMoore(frame, indexes);
         MooreRules mr = getGrainMaxNeighbour(grainMap);
         int randomNumber;
 
-        if (mr.quantity >= 5){
+        if (mr.quantity >= 5) {
             return mr.grain;
-        } else{
+        } else {
             grainMap = createNeighboursMapNearestMoore(frame, indexes);
             mr = getGrainMaxNeighbour(grainMap);
-            if (mr.quantity >= 3){
+            if (mr.quantity >= 3) {
                 return mr.grain;
             } else {
                 grainMap = createNeighboursMapFurtherMoore(frame, indexes);
                 mr = getGrainMaxNeighbour(grainMap);
-                if (mr.quantity >= 3){
+                if (mr.quantity >= 3) {
                     return mr.grain;
                 } else {
                     grainMap = createNeighboursMapMoore(frame, indexes);
                     mr = getGrainMaxNeighbour(grainMap);
                     randomNumber = ThreadLocalRandom.current().nextInt(1, 100);
-                    if (randomNumber <= probabilityToChange){
+                    if (randomNumber <= probabilityToChange) {
                         return mr.grain;
                     }
                 }
@@ -219,70 +230,87 @@ public class Model {
     private Map<Grain, Integer> createNeighboursMapMoore(Cell[][] frame, Indexes indexes) {
         Map<Grain, Integer> neighboursMap = new HashMap<>();
         Grain grain = null;
+        Cell holdCell = null;
 
-        if (indexes.iG != -1 && indexes.jL != -1)
-            if (frame[indexes.iG][indexes.jL].getState() == GRAIN) {
+        if (indexes.iG != -1 && indexes.jL != -1) {
+            holdCell = frame[indexes.iG][indexes.jL];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iG != -1)
-            if (frame[indexes.iG][indexes.j].getState() == GRAIN) {
+        if (indexes.iG != -1) {
+            holdCell = frame[indexes.iG][indexes.j];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.j].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iG != -1 && indexes.jR != -1)
-            if (frame[indexes.iG][indexes.jR].getState() == GRAIN) {
+        if (indexes.iG != -1 && indexes.jR != -1) {
+            holdCell = frame[indexes.iG][indexes.jR];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.jL != -1)
-            if (frame[indexes.i][indexes.jL].getState() == GRAIN) {
+        if (indexes.jL != -1) {
+            holdCell = frame[indexes.i][indexes.jL];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.i][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.jR != -1)
-            if (frame[indexes.i][indexes.jR].getState() == GRAIN) {
+        if (indexes.jR != -1) {
+            holdCell = frame[indexes.i][indexes.jR];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.i][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iD != -1 && indexes.jL != -1)
-            if (frame[indexes.iD][indexes.jL].getState() == GRAIN) {
+        if (indexes.iD != -1 && indexes.jL != -1) {
+            holdCell = frame[indexes.iD][indexes.jL];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iD != -1)
-            if (frame[indexes.iD][indexes.j].getState() == GRAIN) {
+        if (indexes.iD != -1) {
+            holdCell = frame[indexes.iD][indexes.j];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.j].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iD != -1 && indexes.jR != -1)
-            if (frame[indexes.iD][indexes.jR].getState() == GRAIN) {
+        if (indexes.iD != -1 && indexes.jR != -1) {
+            holdCell = frame[indexes.iD][indexes.jR];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
         return neighboursMap;
     }
@@ -290,38 +318,47 @@ public class Model {
     private Map<Grain, Integer> createNeighboursMapNearestMoore(Cell[][] frame, Indexes indexes) {
         Map<Grain, Integer> neighboursMap = new HashMap<>();
         Grain grain = null;
+        Cell holdCell = null;
 
-        if (indexes.iG != -1)
-            if (frame[indexes.iG][indexes.j].getState() == GRAIN) {
+        if (indexes.iG != -1) {
+            holdCell = frame[indexes.iG][indexes.j];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.j].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.jL != -1)
-            if (frame[indexes.i][indexes.jL].getState() == GRAIN) {
+        if (indexes.jL != -1) {
+            holdCell = frame[indexes.i][indexes.jL];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.i][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.jR != -1)
-            if (frame[indexes.i][indexes.jR].getState() == GRAIN) {
+        if (indexes.jR != -1) {
+            holdCell = frame[indexes.i][indexes.jR];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.i][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iD != -1)
-            if (frame[indexes.iD][indexes.j].getState() == GRAIN) {
+        if (indexes.iD != -1) {
+            holdCell = frame[indexes.iD][indexes.j];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.j].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
         return neighboursMap;
     }
@@ -329,43 +366,55 @@ public class Model {
     private Map<Grain, Integer> createNeighboursMapFurtherMoore(Cell[][] frame, Indexes indexes) {
         Map<Grain, Integer> neighboursMap = new HashMap<>();
         Grain grain = null;
+        Cell holdCell = null;
 
-        if (indexes.iG != -1 && indexes.jL != -1)
-            if (frame[indexes.iG][indexes.jL].getState() == GRAIN) {
+        if (indexes.iG != -1 && indexes.jL != -1) {
+            holdCell = frame[indexes.iG][indexes.jL];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iG != -1 && indexes.jR != -1)
-            if (frame[indexes.iG][indexes.jR].getState() == GRAIN) {
+        if (indexes.iG != -1 && indexes.jR != -1) {
+            holdCell = frame[indexes.iG][indexes.jR];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iG][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iD != -1 && indexes.jL != -1)
-            if (frame[indexes.iD][indexes.jL].getState() == GRAIN) {
+        if (indexes.iD != -1 && indexes.jL != -1) {
+            holdCell = frame[indexes.iD][indexes.jL];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
-        if (indexes.iD != -1 && indexes.jR != -1)
-            if (frame[indexes.iD][indexes.jR].getState() == GRAIN) {
+        if (indexes.iD != -1 && indexes.jR != -1) {
+            holdCell = frame[indexes.iD][indexes.jR];
+            if (holdCell.getState() == GRAIN) {
                 grain = frame[indexes.iD][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
                 }
             }
+        }
 
         return neighboursMap;
     }
 
     private void fillMap(Grain grain, Map<Grain, Integer> grainMap) {
+        if (grain.isFrozen())
+            return;
+
         if (grainMap.containsKey(grain)) grainMap.put(grain, grainMap.get(grain) + 1);
         else grainMap.put(grain, 1);
     }
@@ -375,7 +424,7 @@ public class Model {
         int max = 0;
 
         for (Map.Entry<Grain, Integer> entry : grainMap.entrySet())
-            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0 && entry.getKey().getID() >= 0)
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0 && entry.getKey().getID() >= 0 && !entry.getKey().isFrozen())
                 maxEntry = entry;
 
         Grain grain = null;
@@ -412,14 +461,14 @@ public class Model {
                     }
                 }
                 grid[i][j].setOnBorder(onBorder);
-                if (onBorder){
+                if (onBorder) {
                     listOfCellsOnBorder.add(grid[i][j]);
                 }
             }
         }
     }
 
-    public void addInclusions(InclusionTypes iType, int amount, int radius){
+    public void addInclusions(InclusionTypes iType, int amount, int radius) {
         if (amount <= listOfCellsOnBorder.size() || listOfAvailableCells.size() != 0) {
             int randX, randY, randCell;
             Cell holdCell;
@@ -493,7 +542,7 @@ public class Model {
 
         Coordinates startCell = new Coordinates(x, y);
 
-        if (iType == CIRCLE){
+        if (iType == CIRCLE) {
             radius -= 1;
             startCell = getLeft(startCell.x, startCell.y, radius);
             circleX -= radius;
@@ -504,7 +553,7 @@ public class Model {
 
             for (int i = 0; i < 2 * radius + 1; i++) {
                 for (int j = 0; j < 2 * radius + 1; j++) {
-                    if (getDistanceBetweenCells(middleCell, new Coordinates(circleX, circleY)) <= radius){
+                    if (getDistanceBetweenCells(middleCell, new Coordinates(circleX, circleY)) <= radius) {
                         turnToInclusion(tmpCell);
                     }
                     tmpCell = getRight(tmpCell.x, tmpCell.y, 1);
@@ -515,12 +564,12 @@ public class Model {
                 tmpCell = getDown(tmpCell.x, tmpCell.y, 1);
                 circleY -= 1;
             }
-        } else if (iType == SQUARE){
+        } else if (iType == SQUARE) {
             int a = (int) (Math.ceil(radius / Math.sqrt(2)));
-            startCell = getLeft(startCell.x, startCell.y, a/2);
-            circleX -= a/2;
-            startCell = getUp(startCell.x, startCell.y, a/2);
-            circleY += a/2;
+            startCell = getLeft(startCell.x, startCell.y, a / 2);
+            circleX -= a / 2;
+            startCell = getUp(startCell.x, startCell.y, a / 2);
+            circleY += a / 2;
 
             Coordinates tmpCell = new Coordinates(startCell.x, startCell.y);
 
@@ -538,26 +587,38 @@ public class Model {
         }
     }
 
-    private void turnToInclusion(Coordinates tmpCell){
+    private void turnToInclusion(Coordinates tmpCell) {
         grid[tmpCell.y][tmpCell.x].setState(INCLUSION);
-        grid[tmpCell.y][tmpCell.x].setGrain(new Grain(-1, Grain.INCLUSION_COLOR));
+        grid[tmpCell.y][tmpCell.x].setGrain(new Grain(Grain.INCLUSION_ID, Grain.INCLUSION_COLOR));
         grid[tmpCell.y][tmpCell.x].setOnBorder(false);
         listOfAvailableCells.remove(grid[tmpCell.y][tmpCell.x]);
     }
 
-    private double getDistanceBetweenCells(Coordinates startCell, Coordinates tmpCell){
-        return (Math.sqrt( Math.pow(tmpCell.x - startCell.x, 2) + Math.pow(tmpCell.y - startCell.y, 2) ));
+    private double getDistanceBetweenCells(Coordinates startCell, Coordinates tmpCell) {
+        return (Math.sqrt(Math.pow(tmpCell.x - startCell.x, 2) + Math.pow(tmpCell.y - startCell.y, 2)));
     }
 
-    public void addRemoveSelectedGrain(int x, int y){
+    public void addRemoveSelectedGrain(int x, int y) {
         Grain selectedGrain = grid[x][y].getGrain();
 
         if (selectedGrain != null && listOfSelectedGrains != null) {
-            if (selectedGrain.getID() >= 0) {
+//            if (selectedGrain.getID() >= 0) {
                 if (listOfSelectedGrains.contains(selectedGrain)) {
                     listOfSelectedGrains.remove(selectedGrain);
+                    for (Grain el : Cell.getListOfGrains()){
+                        if (el != selectedGrain)
+                            if (el.getID() == selectedGrain.getID()){
+                                listOfSelectedGrains.remove(el);
+                            }
+                    }
                 } else {
                     listOfSelectedGrains.add(selectedGrain);
+                    for (Grain el : Cell.getListOfGrains()){
+                        if (el != selectedGrain)
+                            if (el.getID() == selectedGrain.getID()) {
+                                listOfSelectedGrains.add(el);
+                            }
+                    }
                 }
 
                 //for tests
@@ -568,6 +629,37 @@ public class Model {
                 }
                 System.out.println(); /////
             }
+//        }
+    }
+
+    public void startStructure(StructureTypes structureTypes, boolean type, int probabilityToChange, int numberOfGrains) {
+
+        for (Grain el : listOfSelectedGrains) {
+            el.setFrozen(true);
+            if (structureTypes.equals(DUAL_PHASE)) {
+                el.setColor(Grain.DUAL_PHASE_COLOR);
+                el.setID(Grain.DUAL_PHASE_ID);
+            }
         }
+
+        for (Cell el : listOfCells) {
+            if (!listOfSelectedGrains.contains(el.getGrain())) {
+                el.setState(EMPTY);
+                el.setOnBorder(false);
+                el.setGrain(null);
+                listOfAvailableCells.add(el);
+            }
+        }
+
+        fillGridWIthGrains(numberOfGrains);
+        startSimulation(probabilityToChange, type);
+        listOfCellsOnBorder.clear();
+        determineBorders();
+
+        for (Grain el : listOfSelectedGrains) {
+            el.setFrozen(false);
+        }
+
+        listOfSelectedGrains.clear();
     }
 }
