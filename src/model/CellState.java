@@ -1,7 +1,7 @@
 package model;
 
 public enum CellState {
-    EMPTY, GRAIN, INCLUSION, MARTENSITE;
+    EMPTY, GRAIN, INCLUSION, DP;
 
     public static CellState fromString(String type){
         switch (type){
@@ -11,8 +11,8 @@ public enum CellState {
                 return GRAIN;
             case "INCLUSION":
                 return INCLUSION;
-            case "MARTENSITE":
-                return MARTENSITE;
+            case "DP":
+                return DP;
         }
         return EMPTY;
     }

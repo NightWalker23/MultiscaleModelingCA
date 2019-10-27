@@ -34,7 +34,7 @@
                               </Menu>
                               <Menu fx:id="menuExport" mnemonicParsing="false" text="Export">
                                 <items>
-                                  <MenuItem fx:id="menuItemIExportDataFile" mnemonicParsing="false" onAction="#exportDataFile" text="Dataf file" />
+                                  <MenuItem fx:id="menuItemIExportDataFile" mnemonicParsing="false" onAction="#exportDataFile" text="Data file" />
                                     <MenuItem fx:id="menuItemIExportBitmap" mnemonicParsing="false" onAction="#exportBitmap" text="Bitmap" />
                                 </items>
                               </Menu>
@@ -65,7 +65,9 @@
             <Label layoutX="510.0" layoutY="311.0" text="\%" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="311.0" />
             <Label layoutX="508.0" layoutY="351.0" text="Structure" AnchorPane.leftAnchor="508.0" AnchorPane.topAnchor="351.0" />
             <ChoiceBox fx:id="choiceBoxStructureType" layoutX="568.0" layoutY="347.0" prefHeight="25.0" prefWidth="120.0" AnchorPane.leftAnchor="568.0" AnchorPane.topAnchor="347.0" />
-            <Button fx:id="buttonStructureStart" layoutX="507.0" layoutY="372.0" mnemonicParsing="false" onAction="#startStructure" text="Start" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="375.0" />
+            <Button fx:id="buttonSelectAll" layoutX="507.0" layoutY="379.0" mnemonicParsing="false" onAction="#startSelectAll" text="Select all" AnchorPane.leftAnchor="507.0" AnchorPane.topAnchor="379.0" />
+            <Button fx:id="buttonUnselectAll" layoutX="577.0" layoutY="379.0" mnemonicParsing="false" onAction="#startUnselectAll" text="Unselect all" AnchorPane.leftAnchor="577.0" AnchorPane.topAnchor="379.0" />
+            <Button fx:id="buttonStructureStart" layoutX="661.0" layoutY="379.0" mnemonicParsing="false" onAction="#startStructure" text="Run" AnchorPane.leftAnchor="661.0" AnchorPane.topAnchor="379.0" />
             <CheckBox fx:id="checkBoxNewGrowth" layoutX="599.0" layoutY="311.0" mnemonicParsing="false" text="New Growth" AnchorPane.leftAnchor="599.0" AnchorPane.topAnchor="311.0" />
          </children>
       </AnchorPane>

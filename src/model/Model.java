@@ -9,11 +9,13 @@ import static model.StructureTypes.*;
 
 public class Model {
     private int width, height;
+    private boolean changed, changedRandom;
     private Cell[][] grid;
     private List<Cell> listOfCells;
     private List<Cell> listOfAvailableCells;
     private List<Cell> listOfCellsOnBorder;
-    private List<Grain> listOfSelectedGrains;
+    private List<Grain> listOfSelectedGrainsSubstructure;
+    private List<Grain> listOfSelectedGrainsDualPhase;
 
     private class Indexes {
         public int i, j, iG, iD, jL, jR;
@@ -37,7 +39,8 @@ public class Model {
         this.listOfCells = new ArrayList<>();
         this.listOfAvailableCells = new ArrayList<>();
         this.listOfCellsOnBorder = new ArrayList<>();
-        this.listOfSelectedGrains = new ArrayList<>();
+        this.listOfSelectedGrainsSubstructure = new ArrayList<>();
+        this.listOfSelectedGrainsDualPhase = new ArrayList<>();
 
         createEmptyGrid();
     }
@@ -66,12 +69,32 @@ public class Model {
         this.listOfAvailableCells = listOfAvailableCells;
     }
 
-    public List<Grain> getListOfSelectedGrains() {
-        return listOfSelectedGrains;
+    public List<Grain> getListOfSelectedGrainsSubstructure() {
+        return listOfSelectedGrainsSubstructure;
     }
 
-    public void setListOfSelectedGrains(List<Grain> listOfSelectedGrains) {
-        this.listOfSelectedGrains = listOfSelectedGrains;
+    public void setListOfSelectedGrainsSubstructure(List<Grain> listOfSelectedGrainsSubstructure) {
+        this.listOfSelectedGrainsSubstructure = listOfSelectedGrainsSubstructure;
+    }
+
+    public void addElementToListOfSelectedGrainsSubstructure(Grain element) {
+        if (listOfSelectedGrainsSubstructure != null){
+            listOfSelectedGrainsSubstructure.add(element);
+        }
+    }
+
+    public List<Grain> getListOfSelectedGrainsDualPhase() {
+        return listOfSelectedGrainsDualPhase;
+    }
+
+    public void setListOfSelectedGrainsDualPhase(List<Grain> listOfSelectedGrainsDualPhase) {
+        this.listOfSelectedGrainsDualPhase = listOfSelectedGrainsDualPhase;
+    }
+
+    public void addElementToListOfSelectedGrainsDualPhase(Grain element) {
+        if (listOfSelectedGrainsDualPhase != null){
+            listOfSelectedGrainsDualPhase.add(element);
+        }
     }
 
     private void createEmptyGrid() {
@@ -103,22 +126,32 @@ public class Model {
     }
 
     public void startSimulation(int probabilityToChange, boolean type) {
-        while (listOfAvailableCells.size() != 0) {
+//        while (listOfAvailableCells.size() != 0) {
+//            process(grid, probabilityToChange, type);
+//        }
+
+        do {
             process(grid, probabilityToChange, type);
-        }
+        } while (listOfAvailableCells.size() != 0 && (changed || changedRandom));
+
     }
 
     public void process(Cell[][] frame, int probabilityToChange, boolean type) {
         Cell[][] tmp = getTmp();
         Cell frameCell, tmpCell;
+        changed = false;
+        changedRandom = false;
+
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
+
                 frameCell = frame[i][j];
                 tmpCell = tmp[i][j];
                 if (frameCell.getState() == EMPTY) {
                     tmpCell.setGrain(determineState(frame, i, j, probabilityToChange, type));
                     if (tmpCell.getGrain() != null) {
                         tmpCell.setState(GRAIN);
+                        changed = true;
                     }
                 } else if (frameCell.getState() == GRAIN) {
                     tmpCell.setState(GRAIN);
@@ -126,7 +159,11 @@ public class Model {
                 } else if (frameCell.getState() == INCLUSION) {
                     tmpCell.setState(INCLUSION);
                     tmpCell.setGrain(frame[i][j].getGrain());
+                } else if (frameCell.getState() == DP) {
+                    tmpCell.setState(DP);
+                    tmpCell.setGrain(frame[i][j].getGrain());
                 }
+
             }
         }
 
@@ -219,6 +256,8 @@ public class Model {
                     randomNumber = ThreadLocalRandom.current().nextInt(1, 100);
                     if (randomNumber <= probabilityToChange) {
                         return mr.grain;
+                    } else {
+                        changedRandom = true;
                     }
                 }
             }
@@ -234,7 +273,7 @@ public class Model {
 
         if (indexes.iG != -1 && indexes.jL != -1) {
             holdCell = frame[indexes.iG][indexes.jL];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.iG][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -244,7 +283,7 @@ public class Model {
 
         if (indexes.iG != -1) {
             holdCell = frame[indexes.iG][indexes.j];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.iG][indexes.j].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -254,7 +293,7 @@ public class Model {
 
         if (indexes.iG != -1 && indexes.jR != -1) {
             holdCell = frame[indexes.iG][indexes.jR];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.iG][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -264,7 +303,7 @@ public class Model {
 
         if (indexes.jL != -1) {
             holdCell = frame[indexes.i][indexes.jL];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.i][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -274,7 +313,7 @@ public class Model {
 
         if (indexes.jR != -1) {
             holdCell = frame[indexes.i][indexes.jR];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.i][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -284,7 +323,7 @@ public class Model {
 
         if (indexes.iD != -1 && indexes.jL != -1) {
             holdCell = frame[indexes.iD][indexes.jL];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.iD][indexes.jL].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -294,7 +333,7 @@ public class Model {
 
         if (indexes.iD != -1) {
             holdCell = frame[indexes.iD][indexes.j];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.iD][indexes.j].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -304,7 +343,7 @@ public class Model {
 
         if (indexes.iD != -1 && indexes.jR != -1) {
             holdCell = frame[indexes.iD][indexes.jR];
-            if (holdCell.getState() == GRAIN) {
+            if (holdCell.getState() == GRAIN || holdCell.getState() == DP) {
                 grain = frame[indexes.iD][indexes.jR].getGrain();
                 if (grain != null) {
                     fillMap(grain, neighboursMap);
@@ -598,52 +637,92 @@ public class Model {
         return (Math.sqrt(Math.pow(tmpCell.x - startCell.x, 2) + Math.pow(tmpCell.y - startCell.y, 2)));
     }
 
-    public void addRemoveSelectedGrain(int x, int y) {
-        Grain selectedGrain = grid[x][y].getGrain();
+    public void addRemoveSelectedGrain(Grain selectedGrain, StructureTypes structureTypes) {
+        if (structureTypes.equals(SUBSTRUCTURE)) {
+            if (selectedGrain != null && listOfSelectedGrainsSubstructure != null) {
+                if (!listOfSelectedGrainsDualPhase.contains(selectedGrain)) {
+                    if (listOfSelectedGrainsSubstructure.contains(selectedGrain)) {
+                        listOfSelectedGrainsSubstructure.remove(selectedGrain);
+                        for (Grain el : Cell.getListOfGrains()) {
+                            if (el != selectedGrain)
+                                if (el.getID() == selectedGrain.getID()) {
+                                    listOfSelectedGrainsSubstructure.remove(el);
+                                }
+                        }
+                    } else {
+                        listOfSelectedGrainsSubstructure.add(selectedGrain);
+                        for (Grain el : Cell.getListOfGrains()) {
+                            if (el != selectedGrain)
+                                if (el.getID() == selectedGrain.getID()) {
+                                    listOfSelectedGrainsSubstructure.add(el);
+                                }
+                        }
+                    }
 
-        if (selectedGrain != null && listOfSelectedGrains != null) {
-//            if (selectedGrain.getID() >= 0) {
-                if (listOfSelectedGrains.contains(selectedGrain)) {
-                    listOfSelectedGrains.remove(selectedGrain);
-                    for (Grain el : Cell.getListOfGrains()){
-                        if (el != selectedGrain)
-                            if (el.getID() == selectedGrain.getID()){
-                                listOfSelectedGrains.remove(el);
-                            }
+                    //for tests
+                    System.out.print("SUBSTRUCTURE:\t");
+                    for (Grain el : listOfSelectedGrainsSubstructure) { /////
+                        if (el != null) {
+                            System.out.print(el.getID() + " ");
+                        }
                     }
-                } else {
-                    listOfSelectedGrains.add(selectedGrain);
-                    for (Grain el : Cell.getListOfGrains()){
-                        if (el != selectedGrain)
-                            if (el.getID() == selectedGrain.getID()) {
-                                listOfSelectedGrains.add(el);
-                            }
-                    }
+                    System.out.println(); /////
                 }
-
-                //for tests
-                for (Grain el : listOfSelectedGrains) { /////
-                    if (el != null) {
-                        System.out.print(el.getID() + " ");
-                    }
-                }
-                System.out.println(); /////
             }
-//        }
+        } else if (structureTypes.equals(DUAL_PHASE)) {
+            if (selectedGrain != null && listOfSelectedGrainsDualPhase != null) {
+                if (!listOfSelectedGrainsSubstructure.contains(selectedGrain)) {
+                    if (listOfSelectedGrainsDualPhase.contains(selectedGrain)) {
+                        listOfSelectedGrainsDualPhase.remove(selectedGrain);
+                        for (Grain el : Cell.getListOfGrains()) {
+                            if (el != selectedGrain)
+                                if (el.getID() == selectedGrain.getID()) {
+                                    listOfSelectedGrainsDualPhase.remove(el);
+                                }
+                        }
+                    } else {
+                        listOfSelectedGrainsDualPhase.add(selectedGrain);
+                        for (Grain el : Cell.getListOfGrains()) {
+                            if (el != selectedGrain)
+                                if (el.getID() == selectedGrain.getID()) {
+                                    listOfSelectedGrainsDualPhase.add(el);
+                                }
+                        }
+                    }
+
+                    //for tests
+                    System.out.print("DUAL PHASE:\t");
+                    for (Grain el : listOfSelectedGrainsDualPhase) { /////
+                        if (el != null) {
+                            System.out.print(el.getID() + " ");
+                        }
+                    }
+                    System.out.println(); /////
+                }
+            }
+        }
     }
 
-    public void startStructure(StructureTypes structureTypes, boolean type, int probabilityToChange, int numberOfGrains) {
+    public void startStructure(boolean type, int probabilityToChange, int numberOfGrains) {
 
-        for (Grain el : listOfSelectedGrains) {
+        for (Grain el : listOfSelectedGrainsSubstructure) {
             el.setFrozen(true);
-            if (structureTypes.equals(DUAL_PHASE)) {
-                el.setColor(Grain.DUAL_PHASE_COLOR);
-                el.setID(Grain.DUAL_PHASE_ID);
+        }
+
+        for (Grain el : listOfSelectedGrainsDualPhase) {
+            el.setFrozen(true);
+            el.setColor(Grain.DUAL_PHASE_COLOR);
+            el.setID(Grain.DUAL_PHASE_ID);
+
+            for (Cell el_c : listOfCells){
+                if (listOfSelectedGrainsDualPhase.contains(el_c.getGrain())){
+                    el_c.setState(DP);
+                }
             }
         }
 
         for (Cell el : listOfCells) {
-            if (!listOfSelectedGrains.contains(el.getGrain())) {
+            if (!listOfSelectedGrainsSubstructure.contains(el.getGrain()) && !listOfSelectedGrainsDualPhase.contains(el.getGrain())) {
                 el.setState(EMPTY);
                 el.setOnBorder(false);
                 el.setGrain(null);
@@ -654,12 +733,23 @@ public class Model {
         fillGridWIthGrains(numberOfGrains);
         startSimulation(probabilityToChange, type);
         listOfCellsOnBorder.clear();
-        determineBorders();
 
-        for (Grain el : listOfSelectedGrains) {
+        for (Grain el : listOfSelectedGrainsSubstructure) {
             el.setFrozen(false);
         }
 
-        listOfSelectedGrains.clear();
+        for (Grain el : listOfSelectedGrainsDualPhase) {
+            el.setFrozen(false);
+        }
+
+        determineBorders();
+
+        for (Grain el : listOfSelectedGrainsSubstructure) {
+            el.setFrozen(true);
+        }
+
+        for (Grain el : listOfSelectedGrainsDualPhase) {
+            el.setFrozen(true);
+        }
     }
 }

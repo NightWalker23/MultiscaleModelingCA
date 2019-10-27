@@ -51,6 +51,7 @@ public class Cell {
 
     public static void resetListOfGrains(){
         listOfGrains = new ArrayList<>();
+        Grain.resetTakenColors();
     }
 
     public Coordinates getCords() {
@@ -79,13 +80,44 @@ public class Cell {
                 listOfGrains.add(grain);
                 Grain.getTakenColors().add(color);
             } else if (Grain.restrictedColors.contains(color)){
-                grain = new Grain(-1, color);
+                if (color.equals(Grain.INCLUSION_COLOR)) {
+
+                    for (Grain el : listOfGrains){
+                        if (el.getID() == -1){
+                            grain = el;
+                            break;
+                        }
+                    }
+
+                    if (grain == null) {
+                        grain = new Grain(-1, Grain.INCLUSION_COLOR);
+                        listOfGrains.add(grain);
+                    }
+
+                    state = INCLUSION;
+                }
+                else if (color.equals(Grain.DUAL_PHASE_COLOR)) {
+                    for (Grain el : listOfGrains){
+                        if (el.getID() == -2){
+                            grain = el;
+                            break;
+                        }
+                    }
+
+                    if (grain == null) {
+                        grain = new Grain(-2, Grain.DUAL_PHASE_COLOR);
+                        listOfGrains.add(grain);
+                    }
+
+                    state = DP;
+                }
             }
             else {
                 grain = getGrainByColor(color);
             }
         }
-        state = GRAIN;
+        if (state == EMPTY)
+            state = GRAIN;
     }
 
     public void turnToGrain(int ID, CellState state, Color color, boolean onBorder) {
@@ -125,6 +157,6 @@ public class Cell {
             if (g.getColor().equals(color))
                 return g;
         }
-        return null;
+        return new Grain(-1, Grain.INCLUSION_COLOR);// null;
     }
 }

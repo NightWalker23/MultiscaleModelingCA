@@ -5,6 +5,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import model.Cell;
 import model.Model;
 
 import javax.imageio.ImageIO;
@@ -54,6 +55,7 @@ public class BitmapIE {
         TODO: dodać tą funkcję do wykonywania w nowym wątku
          */
         Model modelBitmmap = null;
+        Cell.resetListOfGrains();
 
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("BMP FILES", "bmp");

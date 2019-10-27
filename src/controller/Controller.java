@@ -14,6 +14,7 @@ import model.DataIE.BitmapIE;
 import model.DataIE.TextFileIE;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import static model.InclusionTypes.*;
 import static model.CellState.*;
@@ -26,7 +27,7 @@ public class Controller implements Initializable {
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
     public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange;
-    public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonStructureStart;
+    public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonSelectAll, buttonUnselectAll,  buttonStructureStart;
     public ChoiceBox<String> choiceBoxInclusionsType, choiceBoxStructureType;
     public CheckBox checkBoxNewGrowth;
 
@@ -204,10 +205,23 @@ public class Controller implements Initializable {
                     Cell holdCell = holdGrid[i][j];
                     if (holdCell.getState().equals(GRAIN)) {
                         gc.setFill(holdCell.getGrain().getColor());
-//                        if (holdCell.isOnBorder()) gc.setFill(Grain.BORDER_COLOR);    //do rysowania krawędzi
+                        if (holdCell.isOnBorder() && (model.getListOfSelectedGrainsSubstructure().contains(holdCell.getGrain()) ||
+                                                      model.getListOfSelectedGrainsDualPhase().contains(holdCell.getGrain()))){
+                            gc.setFill(Grain.BORDER_COLOR);
+                        }
                         gc.fillRect(i, j, 1, 1);
                     } else if (holdCell.getState().equals(INCLUSION)){
                         gc.setFill(Grain.INCLUSION_COLOR);
+                        gc.fillRect(i, j, 1, 1);
+                    } else if (holdCell.getState().equals(DP)){
+                        gc.setFill(Grain.DUAL_PHASE_COLOR);
+                        if (holdCell.isOnBorder() && (model.getListOfSelectedGrainsSubstructure().contains(holdCell.getGrain()) ||
+                                model.getListOfSelectedGrainsDualPhase().contains(holdCell.getGrain()))){
+                            gc.setFill(Grain.BORDER_COLOR);
+                        }
+                        gc.fillRect(i, j, 1, 1);
+                    } else if (holdCell.getState().equals(EMPTY)){
+                        gc.setFill(Grain.BACKGROUND_COLOR);
                         gc.fillRect(i, j, 1, 1);
                     }
                 }
@@ -241,7 +255,9 @@ public class Controller implements Initializable {
 
         if (model != null){
             if (x > 0 && x < model.getWidth() && y > 0 && y < model.getHeight()){
-                model.addRemoveSelectedGrain(x, y);
+                Grain holdGrain = model.getGrid()[x][y].getGrain();
+                model.addRemoveSelectedGrain(holdGrain, structureTypes);
+                showGridOnCanvas();
             }
         }
     }
@@ -252,11 +268,42 @@ public class Controller implements Initializable {
         boolean type = checkBoxNewGrowth.isSelected();
 
         if (model != null){
-            if (model.getListOfSelectedGrains().size() > 0){
+            if (model.getListOfSelectedGrainsSubstructure().size() > 0 || model.getListOfSelectedGrainsDualPhase().size() > 0){
                 if (probabilityToChange > 0) {
-                    model.startStructure(structureTypes, type, probabilityToChange, numberOfGrains);
+                    model.startStructure(type, probabilityToChange, numberOfGrains);
                 }
             }
+            showGridOnCanvas();
+        }
+    }
+
+    public void startSelectAll(ActionEvent actionEvent) {
+        if (model != null){
+            if (structureTypes.equals(SUBSTRUCTURE)){
+                model.setListOfSelectedGrainsDualPhase(new ArrayList<>());
+            } else if (structureTypes.equals(DUAL_PHASE)){
+                model.setListOfSelectedGrainsSubstructure(new ArrayList<>());
+            }
+
+            for (Grain el : Cell.getListOfGrains()){
+                el.setFrozen(true);
+                if (structureTypes.equals(SUBSTRUCTURE)){
+                    model.addElementToListOfSelectedGrainsSubstructure(el);
+                } else if (structureTypes.equals(DUAL_PHASE)){
+                    model.addElementToListOfSelectedGrainsDualPhase(el);
+                }
+            }
+            showGridOnCanvas();
+        }
+    }
+
+    public void startUnselectAll(ActionEvent actionEvent) {
+        if (model != null){
+            for (Grain el : Cell.getListOfGrains()){
+                el.setFrozen(false);
+            }
+            model.setListOfSelectedGrainsDualPhase(new ArrayList<>());
+            model.setListOfSelectedGrainsSubstructure(new ArrayList<>());
             showGridOnCanvas();
         }
     }

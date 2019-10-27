@@ -26,6 +26,15 @@ public class Grain {
 
     private static List<Color> takenColors = new ArrayList<>();
 
+    public static void setTakenColors(List<Color> takenColors) {
+        Grain.takenColors = takenColors;
+    }
+
+    public static void resetTakenColors() {
+        Grain.takenColors = new ArrayList<>();
+    }
+
+
     public Grain(int ID, Color color) {
         this.ID = ID;
         this.color = color;

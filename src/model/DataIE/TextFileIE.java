@@ -64,6 +64,7 @@ public class TextFileIE {
         TODO: dodać tą funkcję do wykonywania w nowym wątku
          */
         Model modelTextFile = null;
+        Cell.resetListOfGrains();
 
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt");
