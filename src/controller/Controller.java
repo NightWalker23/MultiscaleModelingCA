@@ -26,10 +26,10 @@ public class Controller implements Initializable {
     public Canvas canvas;
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
-    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange;
-    public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonSelectAll, buttonUnselectAll,  buttonStructureStart;
+    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange, fieldGB;
+    public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonSelectAll, buttonUnselectAll,  buttonStructureStart, buttonClearSpace;
     public ChoiceBox<String> choiceBoxInclusionsType, choiceBoxStructureType;
-    public CheckBox checkBoxNewGrowth;
+    public CheckBox checkBoxNewGrowth, checkBoxGB;
 
     private GraphicsContext gc;
     private Model model;
@@ -126,9 +126,12 @@ public class Controller implements Initializable {
 
         if (model != null) {
             numberOfGrains = readValueFromTextField(fieldGrains);
-            if (numberOfGrains > ((int) canvas.getWidth() * (int) canvas.getHeight())) {
-                numberOfGrains = (int) canvas.getWidth() * (int) canvas.getHeight();
+            if (numberOfGrains > model.getListOfAvailableCells().size()){
+                numberOfGrains = model.getListOfAvailableCells().size();
             }
+//            if (numberOfGrains > ((int) canvas.getWidth() * (int) canvas.getHeight())) {
+//                numberOfGrains = (int) canvas.getWidth() * (int) canvas.getHeight();
+//            }
             model.fillGridWIthGrains(numberOfGrains);
             showGridOnCanvas();
         }
@@ -203,7 +206,7 @@ public class Controller implements Initializable {
             for (int i = 0; i < model.getWidth(); i++) {
                 for (int j = 0; j < model.getHeight(); j++) {
                     Cell holdCell = holdGrid[i][j];
-                    if (holdCell.getState().equals(GRAIN)) {
+                    if (holdCell.getState().equals(GRAIN) && holdCell.getGrain() != null) {
                         gc.setFill(holdCell.getGrain().getColor());
                         if (holdCell.isOnBorder() && (model.getListOfSelectedGrainsSubstructure().contains(holdCell.getGrain()) ||
                                                       model.getListOfSelectedGrainsDualPhase().contains(holdCell.getGrain()))){
@@ -284,6 +287,7 @@ public class Controller implements Initializable {
             } else if (structureTypes.equals(DUAL_PHASE)){
                 model.setListOfSelectedGrainsSubstructure(new ArrayList<>());
             }
+            model.setListOfSelectedGrainsGB(new ArrayList<>());
 
             for (Grain el : Cell.getListOfGrains()){
                 el.setFrozen(true);
@@ -292,6 +296,7 @@ public class Controller implements Initializable {
                 } else if (structureTypes.equals(DUAL_PHASE)){
                     model.addElementToListOfSelectedGrainsDualPhase(el);
                 }
+                model.addElementToListOfSelectedGrainsGB(el);
             }
             showGridOnCanvas();
         }
@@ -304,7 +309,19 @@ public class Controller implements Initializable {
             }
             model.setListOfSelectedGrainsDualPhase(new ArrayList<>());
             model.setListOfSelectedGrainsSubstructure(new ArrayList<>());
+            model.setListOfSelectedGrainsGB(new ArrayList<>());
             showGridOnCanvas();
+        }
+    }
+
+    public void startClearSpace(ActionEvent actionEvent) {
+        int gbSize = readValueFromTextField(fieldGB);
+
+        if (model != null && checkBoxGB.isSelected()){
+            model.clearSpace(gbSize);
+            showGridOnCanvas();
+            model.setChanged(false);
+            model.setChangedRandom(false);
         }
     }
 }

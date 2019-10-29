@@ -6,6 +6,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import model.Cell;
+import model.Grain;
 import model.Model;
 
 import javax.imageio.ImageIO;
@@ -29,7 +30,8 @@ public class BitmapIE {
     }
 
     public void exportData(Model model, Canvas canvas) {
-        if (model != null && model.getListOfAvailableCells().size() == 0) {
+        //if (model != null && model.getListOfAvailableCells().size() == 0) {
+        if (model != null && model.isSimulationFinished()) {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setInitialDirectory(new File("./"));
 
@@ -69,6 +71,7 @@ public class BitmapIE {
             try {
                 BufferedImage image = ImageIO.read(chooser.getSelectedFile());
                 modelBitmmap = new Model(image.getWidth(), image.getHeight());
+                modelBitmmap.setListOfAvailableCells(new ArrayList<>());
 
                 Color colorFromRGB;
                 for (int xPixel = 0; xPixel < image.getWidth(); xPixel++) {
@@ -76,10 +79,13 @@ public class BitmapIE {
                         color = image.getRGB(xPixel, yPixel);
                         colorFromRGB = Color.rgb((color >> 16) & 0xFF, (color >> 8) & 0xFF, ((color >> 0) & 0xFF));
                         modelBitmmap.getGrid()[xPixel][yPixel].createNewGrain(colorFromRGB);
+                        if (colorFromRGB.equals(Grain.BACKGROUND_COLOR)){
+                            modelBitmmap.getListOfAvailableCells().add(modelBitmmap.getGrid()[xPixel][yPixel]);
+                        }
                     }
                 }
                 modelBitmmap.determineBorders();
-                modelBitmmap.setListOfAvailableCells(new ArrayList<>());
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

@@ -74,11 +74,13 @@ public class Cell {
             } while (!isGrainColorAvailable(randomColor));
             grain = new Grain(listOfGrains.size(), randomColor);
             listOfGrains.add(grain);
+            state = GRAIN;
         } else {
             if (!Grain.getTakenColors().contains(color) && !Grain.restrictedColors.contains(color)) {
                 grain = new Grain(listOfGrains.size(), color);
                 listOfGrains.add(grain);
                 Grain.getTakenColors().add(color);
+                state = GRAIN;
             } else if (Grain.restrictedColors.contains(color)){
                 if (color.equals(Grain.INCLUSION_COLOR)) {
 
@@ -114,21 +116,28 @@ public class Cell {
             }
             else {
                 grain = getGrainByColor(color);
+                state = GRAIN;
             }
         }
-        if (state == EMPTY)
-            state = GRAIN;
+
+//        if (state == EMPTY)
+//            state = GRAIN;
     }
 
     public void turnToGrain(int ID, CellState state, Color color, boolean onBorder) {
         this.state = state;
         this.onBorder = onBorder;
-        Grain holdGrain = getGrainByID(ID);
-        if (holdGrain == null) {
-            grain = new Grain(ID, color);
-            listOfGrains.add(grain);
+
+        if (state == EMPTY){
+            grain = null;
         } else {
-            grain = holdGrain;
+            Grain holdGrain = getGrainByID(ID);
+            if (holdGrain == null) {
+                grain = new Grain(ID, color);
+                listOfGrains.add(grain);
+            } else {
+                grain = holdGrain;
+            }
         }
     }
 

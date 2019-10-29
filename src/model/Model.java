@@ -16,6 +16,7 @@ public class Model {
     private List<Cell> listOfCellsOnBorder;
     private List<Grain> listOfSelectedGrainsSubstructure;
     private List<Grain> listOfSelectedGrainsDualPhase;
+    private List<Grain> listOfSelectedGrainsGB;
 
     private class Indexes {
         public int i, j, iG, iD, jL, jR;
@@ -41,8 +42,32 @@ public class Model {
         this.listOfCellsOnBorder = new ArrayList<>();
         this.listOfSelectedGrainsSubstructure = new ArrayList<>();
         this.listOfSelectedGrainsDualPhase = new ArrayList<>();
+        this.listOfSelectedGrainsGB = new ArrayList<>();
+        changed = false;
+        changedRandom = false;
 
         createEmptyGrid();
+    }
+
+    public boolean isSimulationFinished(){
+//        return (listOfAvailableCells.size() != 0 && (!changed || !changedRandom));
+        return (listOfAvailableCells.size() == 0 || (!changed && !changedRandom));
+    }
+
+    public boolean isChanged() {
+        return changed;
+    }
+
+    public void setChanged(boolean changed) {
+        this.changed = changed;
+    }
+
+    public boolean isChangedRandom() {
+        return changedRandom;
+    }
+
+    public void setChangedRandom(boolean changedRandom) {
+        this.changedRandom = changedRandom;
     }
 
     public Cell[][] getGrid() {
@@ -94,6 +119,20 @@ public class Model {
     public void addElementToListOfSelectedGrainsDualPhase(Grain element) {
         if (listOfSelectedGrainsDualPhase != null){
             listOfSelectedGrainsDualPhase.add(element);
+        }
+    }
+
+    public List<Grain> getListOfSelectedGrainsGB() {
+        return listOfSelectedGrainsGB;
+    }
+
+    public void setListOfSelectedGrainsGB(List<Grain> listOfSelectedGrainsGB) {
+        this.listOfSelectedGrainsGB = listOfSelectedGrainsGB;
+    }
+
+    public void addElementToListOfSelectedGrainsGB(Grain element) {
+        if (listOfSelectedGrainsGB != null){
+            listOfSelectedGrainsGB.add(element);
         }
     }
 
@@ -253,11 +292,13 @@ public class Model {
                 } else {
                     grainMap = createNeighboursMapMoore(frame, indexes);
                     mr = getGrainMaxNeighbour(grainMap);
-                    randomNumber = ThreadLocalRandom.current().nextInt(1, 100);
-                    if (randomNumber <= probabilityToChange) {
-                        return mr.grain;
-                    } else {
-                        changedRandom = true;
+                    if (mr.quantity > 0) {
+                        randomNumber = ThreadLocalRandom.current().nextInt(1, 100);
+                        if (randomNumber <= probabilityToChange) {
+                            return mr.grain;
+                        } else {
+                            changedRandom = true;
+                        }
                     }
                 }
             }
@@ -512,7 +553,8 @@ public class Model {
             int randX, randY, randCell;
             Cell holdCell;
             for (int i = 0; i < amount; i++) {
-                if (listOfAvailableCells.size() == 0) {
+//                if (listOfAvailableCells.size() == 0) {
+                if (listOfCellsOnBorder.size() > 0) {
                     randCell = ThreadLocalRandom.current().nextInt(0, listOfCellsOnBorder.size());
                     holdCell = listOfCellsOnBorder.get(randCell);
                     createInclusion(holdCell.getCords().y, holdCell.getCords().x, radius, iType);
@@ -642,65 +684,90 @@ public class Model {
             if (selectedGrain != null && listOfSelectedGrainsSubstructure != null) {
                 if (!listOfSelectedGrainsDualPhase.contains(selectedGrain)) {
                     if (listOfSelectedGrainsSubstructure.contains(selectedGrain)) {
+
                         listOfSelectedGrainsSubstructure.remove(selectedGrain);
+                        listOfSelectedGrainsGB.remove(selectedGrain);
                         for (Grain el : Cell.getListOfGrains()) {
                             if (el != selectedGrain)
                                 if (el.getID() == selectedGrain.getID()) {
                                     listOfSelectedGrainsSubstructure.remove(el);
+                                    listOfSelectedGrainsGB.remove(el);
                                 }
                         }
+
                     } else {
+
                         listOfSelectedGrainsSubstructure.add(selectedGrain);
+                        listOfSelectedGrainsGB.add(selectedGrain);
                         for (Grain el : Cell.getListOfGrains()) {
                             if (el != selectedGrain)
                                 if (el.getID() == selectedGrain.getID()) {
                                     listOfSelectedGrainsSubstructure.add(el);
+                                    listOfSelectedGrainsGB.add(el);
                                 }
                         }
+
                     }
 
                     //for tests
-                    System.out.print("SUBSTRUCTURE:\t");
-                    for (Grain el : listOfSelectedGrainsSubstructure) { /////
-                        if (el != null) {
-                            System.out.print(el.getID() + " ");
-                        }
-                    }
-                    System.out.println(); /////
+//                    System.out.print("SUBSTRUCTURE:\t");
+//                    for (Grain el : listOfSelectedGrainsSubstructure) { /////
+//                        if (el != null) {
+//                            System.out.print(el.getID() + " ");
+//                        }
+//                    }
+//                    System.out.println(); /////
                 }
             }
         } else if (structureTypes.equals(DUAL_PHASE)) {
             if (selectedGrain != null && listOfSelectedGrainsDualPhase != null) {
                 if (!listOfSelectedGrainsSubstructure.contains(selectedGrain)) {
                     if (listOfSelectedGrainsDualPhase.contains(selectedGrain)) {
+
                         listOfSelectedGrainsDualPhase.remove(selectedGrain);
+                        listOfSelectedGrainsGB.remove(selectedGrain);
                         for (Grain el : Cell.getListOfGrains()) {
                             if (el != selectedGrain)
                                 if (el.getID() == selectedGrain.getID()) {
                                     listOfSelectedGrainsDualPhase.remove(el);
+                                    listOfSelectedGrainsGB.remove(el);
                                 }
                         }
+
                     } else {
+
                         listOfSelectedGrainsDualPhase.add(selectedGrain);
+                        listOfSelectedGrainsGB.add(selectedGrain);
                         for (Grain el : Cell.getListOfGrains()) {
                             if (el != selectedGrain)
                                 if (el.getID() == selectedGrain.getID()) {
                                     listOfSelectedGrainsDualPhase.add(el);
+                                    listOfSelectedGrainsGB.add(el);
                                 }
                         }
+
                     }
 
                     //for tests
-                    System.out.print("DUAL PHASE:\t");
-                    for (Grain el : listOfSelectedGrainsDualPhase) { /////
-                        if (el != null) {
-                            System.out.print(el.getID() + " ");
-                        }
-                    }
-                    System.out.println(); /////
+//                    System.out.print("DUAL PHASE:\t");
+//                    for (Grain el : listOfSelectedGrainsDualPhase) { /////
+//                        if (el != null) {
+//                            System.out.print(el.getID() + " ");
+//                        }
+//                    }
+//                    System.out.println(); /////
                 }
             }
         }
+
+        //for tests
+//        System.out.print("GB:\t");
+//        for (Grain el : listOfSelectedGrainsGB) { /////
+//            if (el != null) {
+//                System.out.print(el.getID() + " ");
+//            }
+//        }
+//        System.out.println(); /////
     }
 
     public void startStructure(boolean type, int probabilityToChange, int numberOfGrains) {
@@ -750,6 +817,30 @@ public class Model {
 
         for (Grain el : listOfSelectedGrainsDualPhase) {
             el.setFrozen(true);
+        }
+    }
+
+    public void clearSpace(int gbSize){
+        listOfSelectedGrainsSubstructure = new ArrayList<>();
+        listOfSelectedGrainsDualPhase = new ArrayList<>();
+
+        if (listOfSelectedGrainsGB.size() > 0){
+            for (Cell el : listOfCellsOnBorder){
+                if (listOfSelectedGrainsGB.contains(el.getGrain())){
+                    createInclusion(el.getCords().y, el.getCords().x, gbSize, SQUARE);
+                }
+            }
+
+            for (Cell el : listOfCells){
+                if (el.getState() != INCLUSION){
+                    Cell.getListOfGrains().remove(el.getGrain());
+                    el.setState(EMPTY);
+                    el.setGrain(null);
+                    el.setOnBorder(false);
+                    listOfAvailableCells.add(el);
+                }
+            }
+            listOfSelectedGrainsGB = new ArrayList<>();
         }
     }
 }

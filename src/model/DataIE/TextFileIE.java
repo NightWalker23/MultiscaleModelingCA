@@ -3,6 +3,7 @@ package model.DataIE;
 import javafx.scene.paint.Color;
 import model.Cell;
 import model.CellState;
+import model.Grain;
 import model.Model;
 
 import javax.swing.*;
@@ -28,7 +29,8 @@ public class TextFileIE {
     }
 
     public void exportData(Model model) {
-        if (model != null && model.getListOfAvailableCells().size() == 0) {
+        //if (model != null && model.getListOfAvailableCells().size() == 0) {
+        if (model != null && model.isSimulationFinished()) {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("./"));
 
@@ -43,11 +45,19 @@ public class TextFileIE {
                     for (int i = 0; i < x; i++) {
                         for (int j = 0; j < y; j++) {
                             Cell holdCell = model.getGrid()[i][j];
-                            fw.write("\n" + i + "\t" + j + "\t" +
-                                    holdCell.getGrain().getID() + "\t" +
-                                    holdCell.getGrain().getColor() + "\t" +
-                                    holdCell.getState() + "\t" +
-                                    holdCell.isOnBorder());
+                            if (holdCell.getGrain() == null){
+                                fw.write("\n" + i + "\t" + j + "\t" +
+                                        0 + "\t" +
+                                        Grain.BACKGROUND_COLOR + "\t" +
+                                        holdCell.getState() + "\t" +
+                                        holdCell.isOnBorder());
+                            }else {
+                                fw.write("\n" + i + "\t" + j + "\t" +
+                                        holdCell.getGrain().getID() + "\t" +
+                                        holdCell.getGrain().getColor() + "\t" +
+                                        holdCell.getState() + "\t" +
+                                        holdCell.isOnBorder());
+                            }
                         }
                     }
 
@@ -85,6 +95,7 @@ public class TextFileIE {
                 x = Integer.parseInt(splittedLine[0]);
                 y = Integer.parseInt(splittedLine[1]);
                 modelTextFile = new Model(x, y);
+                modelTextFile.setListOfAvailableCells(new ArrayList<>());
 
                 line = br.readLine();
 
@@ -98,12 +109,15 @@ public class TextFileIE {
                     onBorder = Boolean.parseBoolean(splittedLine[5]);
 
                     modelTextFile.getGrid()[x][y].turnToGrain(ID, state, color, onBorder);
+                    if (state.equals(CellState.EMPTY)){
+                        modelTextFile.getListOfAvailableCells().add(modelTextFile.getGrid()[x][y]);
+                    }
                     line = br.readLine();
                 }
 
                 br.close();
                 modelTextFile.determineBorders();
-                modelTextFile.setListOfAvailableCells(new ArrayList<>());
+//                modelTextFile.setListOfAvailableCells(new ArrayList<>());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

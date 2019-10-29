@@ -69,6 +69,10 @@
             <Button fx:id="buttonUnselectAll" layoutX="577.0" layoutY="379.0" mnemonicParsing="false" onAction="#startUnselectAll" text="Unselect all" AnchorPane.leftAnchor="577.0" AnchorPane.topAnchor="379.0" />
             <Button fx:id="buttonStructureStart" layoutX="661.0" layoutY="379.0" mnemonicParsing="false" onAction="#startStructure" text="Run" AnchorPane.leftAnchor="661.0" AnchorPane.topAnchor="379.0" />
             <CheckBox fx:id="checkBoxNewGrowth" layoutX="599.0" layoutY="311.0" mnemonicParsing="false" text="New Growth" AnchorPane.leftAnchor="599.0" AnchorPane.topAnchor="311.0" />
+            <TextField fx:id="fieldGB" layoutX="558.0" layoutY="427.0" prefHeight="25.0" prefWidth="66.0" AnchorPane.leftAnchor="558.0" AnchorPane.topAnchor="427.0" />
+            <Label layoutX="506.0" layoutY="431.0" text="GB Size" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="431.0" />
+            <CheckBox fx:id="checkBoxGB" layoutX="636.0" layoutY="431.0" mnemonicParsing="false" text="GB" AnchorPane.leftAnchor="636.0" AnchorPane.topAnchor="431.0" />
+            <Button fx:id="buttonClearSpace" layoutX="507.0" layoutY="461.0" mnemonicParsing="false" onAction="#startClearSpace" text="Clear space" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="461.0" />
          </children>
       </AnchorPane>
    </children>
