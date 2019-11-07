@@ -843,4 +843,20 @@ public class Model {
             listOfSelectedGrainsGB = new ArrayList<>();
         }
     }
+
+    public double countGB(){
+        double result = 0.0;
+        double counter = 0;
+        double area = width * height;
+
+        for (Cell el : listOfCells){
+            if (el.getState().equals(INCLUSION)){
+                counter++;
+            }
+        }
+
+        result = counter * 100.0 / area;
+
+        return result;
+    }
 }

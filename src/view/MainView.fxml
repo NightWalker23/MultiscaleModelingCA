@@ -73,6 +73,7 @@
             <Label layoutX="506.0" layoutY="431.0" text="GB Size" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="431.0" />
             <CheckBox fx:id="checkBoxGB" layoutX="636.0" layoutY="431.0" mnemonicParsing="false" text="GB" AnchorPane.leftAnchor="636.0" AnchorPane.topAnchor="431.0" />
             <Button fx:id="buttonClearSpace" layoutX="507.0" layoutY="461.0" mnemonicParsing="false" onAction="#startClearSpace" text="Clear space" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="461.0" />
+            <Label fx:id="labelGB" layoutX="601.0" layoutY="465.0" text="Label" />
          </children>
       </AnchorPane>
    </children>

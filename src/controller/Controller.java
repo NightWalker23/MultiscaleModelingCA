@@ -30,6 +30,7 @@ public class Controller implements Initializable {
     public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonSelectAll, buttonUnselectAll,  buttonStructureStart, buttonClearSpace;
     public ChoiceBox<String> choiceBoxInclusionsType, choiceBoxStructureType;
     public CheckBox checkBoxNewGrowth, checkBoxGB;
+    public Label labelGB;
 
     private GraphicsContext gc;
     private Model model;
@@ -76,6 +77,7 @@ public class Controller implements Initializable {
         });
 
         checkBoxNewGrowth.setSelected(false);
+        labelGB.setText("0.0 %");
     }
 
     public void importDataFile(ActionEvent actionEvent) {
@@ -322,6 +324,8 @@ public class Controller implements Initializable {
             showGridOnCanvas();
             model.setChanged(false);
             model.setChangedRandom(false);
+
+            labelGB.setText(String.valueOf(model.countGB()) + " %");
         }
     }
 }
