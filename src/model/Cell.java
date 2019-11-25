@@ -141,7 +141,7 @@ public class Cell {
         }
     }
 
-    private boolean isGrainColorAvailable(Color color) {
+    public static boolean isGrainColorAvailable(Color color) {
         if (Grain.restrictedColors.contains(color)) {
             return false;
         }

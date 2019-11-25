@@ -8,16 +8,18 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
 
-<GridPane hgap="10" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="700.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
+<GridPane hgap="10" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="850.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
    <children>
-      <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="700.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+      <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="850.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
          <children>
             <Canvas fx:id="canvas" height="500.0" layoutY="25.0" onMouseClicked="#clickCanvas" width="500.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0" />
             <VBox prefHeight="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -74,6 +76,13 @@
             <CheckBox fx:id="checkBoxGB" layoutX="636.0" layoutY="431.0" mnemonicParsing="false" text="GB" AnchorPane.leftAnchor="636.0" AnchorPane.topAnchor="431.0" />
             <Button fx:id="buttonClearSpace" layoutX="507.0" layoutY="461.0" mnemonicParsing="false" onAction="#startClearSpace" text="Clear space" AnchorPane.leftAnchor="510.0" AnchorPane.topAnchor="461.0" />
             <Label fx:id="labelGB" layoutX="601.0" layoutY="465.0" text="Label" />
+            <RadioButton fx:id="radioCA" layoutX="708.0" layoutY="35.0" mnemonicParsing="false" text="CA" AnchorPane.leftAnchor="710.0" AnchorPane.topAnchor="35.0" />
+            <RadioButton fx:id="radioMC" layoutX="757.0" layoutY="35.0" mnemonicParsing="false" text="MC" AnchorPane.leftAnchor="755.0" AnchorPane.topAnchor="35.0" />
+            <Label layoutX="710.0" layoutY="68.0" text="Iterations" />
+            <TextField fx:id="fieldIterationsMC" layoutX="762.0" layoutY="64.0" prefHeight="25.0" prefWidth="66.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="64.0" />
+            <TextField fx:id="fieldJ" layoutX="760.0" layoutY="99.0" prefHeight="25.0" prefWidth="66.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="99.0" />
+            <Label layoutX="753.0" layoutY="103.0" text="J" AnchorPane.leftAnchor="753.0" AnchorPane.topAnchor="103.0" />
+            <Line endX="-32.0" endY="-134.0" layoutX="735.0" layoutY="170.0" startX="-32.0" startY="379.5" stroke="#a1a1a1" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="705.0" AnchorPane.topAnchor="30.0" />
          </children>
       </AnchorPane>
    </children>

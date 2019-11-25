@@ -26,11 +26,12 @@ public class Controller implements Initializable {
     public Canvas canvas;
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
-    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange, fieldGB;
+    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange, fieldGB, fieldIterationsMC, fieldJ;
     public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonSelectAll, buttonUnselectAll,  buttonStructureStart, buttonClearSpace;
     public ChoiceBox<String> choiceBoxInclusionsType, choiceBoxStructureType;
     public CheckBox checkBoxNewGrowth, checkBoxGB;
     public Label labelGB;
+    public RadioButton radioCA, radioMC;
 
     private GraphicsContext gc;
     private Model model;
@@ -38,12 +39,13 @@ public class Controller implements Initializable {
     private BitmapIE bitmapIE;
     private InclusionTypes inclusionsType;
     private StructureTypes structureTypes;
+    private ToggleGroup radioGroup;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         gc = canvas.getGraphicsContext2D();
-        fieldX.setText(String.valueOf(500));
-        fieldY.setText(String.valueOf(500));
+        fieldX.setText(String.valueOf(200));
+        fieldY.setText(String.valueOf(200));
         fieldProbabilityToChange.setText(String.valueOf(100));
 
         String[] typeOfInclusions = new String[]{"Square", "Circle"};
@@ -78,6 +80,14 @@ public class Controller implements Initializable {
 
         checkBoxNewGrowth.setSelected(false);
         labelGB.setText("0.0 %");
+
+        radioGroup = new ToggleGroup();
+        radioCA.setToggleGroup(radioGroup);
+        radioMC.setSelected(true);
+        radioMC.setToggleGroup(radioGroup);
+
+        fieldJ.setText("1");
+        fieldIterationsMC.setText("1");
     }
 
     public void importDataFile(ActionEvent actionEvent) {
@@ -125,33 +135,52 @@ public class Controller implements Initializable {
             createNewModel();
         }
 
+        if (radioGroup.getSelectedToggle().equals(radioMC))
+            createNewModel();
+
 
         if (model != null) {
             numberOfGrains = readValueFromTextField(fieldGrains);
             if (numberOfGrains > model.getListOfAvailableCells().size()){
                 numberOfGrains = model.getListOfAvailableCells().size();
             }
-//            if (numberOfGrains > ((int) canvas.getWidth() * (int) canvas.getHeight())) {
-//                numberOfGrains = (int) canvas.getWidth() * (int) canvas.getHeight();
-//            }
-            model.fillGridWIthGrains(numberOfGrains);
+
+            if (radioGroup.getSelectedToggle().equals(radioCA)){
+                model.fillGridWIthGrains(numberOfGrains);
+            } else {
+                model.fillGridWIthGrainsMC(numberOfGrains);
+            }
+
             showGridOnCanvas();
         }
     }
 
     public void startGrowth(ActionEvent actionEvent) {
         int probabilityToChange = readValueFromTextField(fieldProbabilityToChange);
+        int iterations;
+        double J = 0;
+
+        iterations = readValueFromTextField(fieldIterationsMC);
+        try {
+            J = Double.parseDouble(fieldJ.getText());
+        } catch (NumberFormatException ignored) {
+        }
 
         if (model != null) {
-            if (checkBoxNewGrowth.isSelected()){
-                if (probabilityToChange > 0) {
-                    model.startSimulation(probabilityToChange, true);
+            if (radioGroup.getSelectedToggle().equals(radioCA)) {
+                if (checkBoxNewGrowth.isSelected()) {
+                    if (probabilityToChange > 0) {
+                        model.startSimulation(probabilityToChange, true);
+                        model.determineBorders();
+                        showGridOnCanvas();
+                    }
+                } else {
+                    model.startSimulation(probabilityToChange, false);
                     model.determineBorders();
                     showGridOnCanvas();
                 }
             } else {
-                model.startSimulation(probabilityToChange, false);
-                model.determineBorders();
+                model.startSimulationMC(iterations, J);
                 showGridOnCanvas();
             }
         }

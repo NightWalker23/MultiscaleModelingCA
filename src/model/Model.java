@@ -1,5 +1,7 @@
 package model;
 
+import javafx.scene.paint.Color;
+
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -12,6 +14,7 @@ public class Model {
     private boolean changed, changedRandom;
     private Cell[][] grid;
     private List<Cell> listOfCells;
+    private List<Cell> listOfCellsMC;
     private List<Cell> listOfAvailableCells;
     private List<Cell> listOfCellsOnBorder;
     private List<Grain> listOfSelectedGrainsSubstructure;
@@ -40,6 +43,7 @@ public class Model {
         this.listOfCells = new ArrayList<>();
         this.listOfAvailableCells = new ArrayList<>();
         this.listOfCellsOnBorder = new ArrayList<>();
+        this.listOfCellsMC = new ArrayList<>();
         this.listOfSelectedGrainsSubstructure = new ArrayList<>();
         this.listOfSelectedGrainsDualPhase = new ArrayList<>();
         this.listOfSelectedGrainsGB = new ArrayList<>();
@@ -49,7 +53,7 @@ public class Model {
         createEmptyGrid();
     }
 
-    public boolean isSimulationFinished(){
+    public boolean isSimulationFinished() {
 //        return (listOfAvailableCells.size() != 0 && (!changed || !changedRandom));
         return (listOfAvailableCells.size() == 0 || (!changed && !changedRandom));
     }
@@ -103,7 +107,7 @@ public class Model {
     }
 
     public void addElementToListOfSelectedGrainsSubstructure(Grain element) {
-        if (listOfSelectedGrainsSubstructure != null){
+        if (listOfSelectedGrainsSubstructure != null) {
             listOfSelectedGrainsSubstructure.add(element);
         }
     }
@@ -117,7 +121,7 @@ public class Model {
     }
 
     public void addElementToListOfSelectedGrainsDualPhase(Grain element) {
-        if (listOfSelectedGrainsDualPhase != null){
+        if (listOfSelectedGrainsDualPhase != null) {
             listOfSelectedGrainsDualPhase.add(element);
         }
     }
@@ -131,7 +135,7 @@ public class Model {
     }
 
     public void addElementToListOfSelectedGrainsGB(Grain element) {
-        if (listOfSelectedGrainsGB != null){
+        if (listOfSelectedGrainsGB != null) {
             listOfSelectedGrainsGB.add(element);
         }
     }
@@ -164,15 +168,53 @@ public class Model {
         }
     }
 
-    public void startSimulation(int probabilityToChange, boolean type) {
-//        while (listOfAvailableCells.size() != 0) {
-//            process(grid, probabilityToChange, type);
-//        }
+    public void fillGridWIthGrainsMC(int numberOfGrainsToFill) {
+        Cell.resetListOfGrains();
+        int numberOfAvailableCells = listOfAvailableCells.size();
+        if (numberOfGrainsToFill <= numberOfAvailableCells && numberOfGrainsToFill > 0) {
+            for (int i = 1; i <= numberOfGrainsToFill; i++) {
+                float r, g, b;
+                Color randomColor;
+                do {
+                    r = ThreadLocalRandom.current().nextFloat();
+                    g = ThreadLocalRandom.current().nextFloat();
+                    b = ThreadLocalRandom.current().nextFloat();
 
+                    randomColor = Color.color(r, g, b);
+                } while (!Cell.isGrainColorAvailable(randomColor));
+                Cell.getListOfGrains().add(new Grain(i, randomColor));
+            }
+
+            int randomGrain;
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    randomGrain = ThreadLocalRandom.current().nextInt(0, numberOfGrainsToFill);
+                    Cell holdCell = grid[i][j];
+                    holdCell.setGrain(Cell.getListOfGrains().get(randomGrain));
+                    holdCell.setState(GRAIN);
+                    listOfAvailableCells.remove(holdCell);
+                    numberOfAvailableCells--;
+                }
+            }
+        }
+    }
+
+    public void startSimulation(int probabilityToChange, boolean type) {
         do {
             process(grid, probabilityToChange, type);
         } while (listOfAvailableCells.size() != 0 && (changed || changedRandom));
 
+    }
+
+    public void startSimulationMC(int iterations, double J) {
+        listOfCellsMC.addAll(0, listOfCells);
+
+        for (int i = 0; i < iterations; i++){
+            processMC(J);
+            listOfCellsMC.addAll(0, listOfCells);
+        }
+
+        determineBorders();
     }
 
     public void process(Cell[][] frame, int probabilityToChange, boolean type) {
@@ -222,6 +264,20 @@ public class Model {
         }
     }
 
+
+    public void processMC(double J) {
+        Cell tmpCell;
+        int randomCell;
+
+        while (listOfCellsMC.size() != 0){
+            randomCell = ThreadLocalRandom.current().nextInt(0, listOfCellsMC.size());
+            tmpCell = listOfCellsMC.get(randomCell);
+            listOfCellsMC.remove(tmpCell);
+            tmpCell.setGrain(determineStateMC(tmpCell, J));
+        }
+    }
+
+
     private Cell[][] getTmp() {
         Cell[][] tmp = new Cell[width][height];
         for (int i = 0; i < width; i++)
@@ -238,6 +294,41 @@ public class Model {
             return getNewState(frame, indexes, probabilityToChange);
         else
             return getClassicNewState(frame, indexes);
+    }
+
+
+    private Grain determineStateMC(Cell tmpCell, double J) {
+        Indexes indexes = determineIndexes(tmpCell.getCords().x, tmpCell.getCords().y);
+
+        return getNewStateMC(tmpCell, indexes, J);
+    }
+
+    private Grain getNewStateMC(Cell tmpCell, Indexes indexes, double J) {
+        Map<Grain, Integer> grainMap = createNeighboursMapMoore(grid, indexes);
+        Grain tmpGrain = null;
+        double currentEenrgy = calculateEnergy(grainMap, tmpCell.getGrain(), J);
+
+        Object[] values = grainMap.keySet().toArray();
+        Object randomValue = (Grain)values[ThreadLocalRandom.current().nextInt(0, values.length)];
+        tmpGrain = (Grain)randomValue;
+
+        double newEnergy = calculateEnergy(grainMap, tmpGrain, J);
+        double deltaE = newEnergy - currentEenrgy;
+
+        return deltaE <= 0 ? tmpGrain : tmpCell.getGrain();
+    }
+
+
+    private double calculateEnergy(Map<Grain, Integer> grainMap, Grain tmpGrain, double J){
+        int energy = 0;
+
+        for (Map.Entry<Grain, Integer> entry : grainMap.entrySet()){
+            if (entry.getKey() != tmpGrain){
+                energy += entry.getValue();
+            }
+        }
+
+        return J * energy;
     }
 
     private Indexes determineIndexes(int i, int j) {
@@ -781,8 +872,8 @@ public class Model {
             el.setColor(Grain.DUAL_PHASE_COLOR);
             el.setID(Grain.DUAL_PHASE_ID);
 
-            for (Cell el_c : listOfCells){
-                if (listOfSelectedGrainsDualPhase.contains(el_c.getGrain())){
+            for (Cell el_c : listOfCells) {
+                if (listOfSelectedGrainsDualPhase.contains(el_c.getGrain())) {
                     el_c.setState(DP);
                 }
             }
@@ -820,19 +911,19 @@ public class Model {
         }
     }
 
-    public void clearSpace(int gbSize){
+    public void clearSpace(int gbSize) {
         listOfSelectedGrainsSubstructure = new ArrayList<>();
         listOfSelectedGrainsDualPhase = new ArrayList<>();
 
-        if (listOfSelectedGrainsGB.size() > 0){
-            for (Cell el : listOfCellsOnBorder){
-                if (listOfSelectedGrainsGB.contains(el.getGrain())){
+        if (listOfSelectedGrainsGB.size() > 0) {
+            for (Cell el : listOfCellsOnBorder) {
+                if (listOfSelectedGrainsGB.contains(el.getGrain())) {
                     createInclusion(el.getCords().y, el.getCords().x, gbSize, SQUARE);
                 }
             }
 
-            for (Cell el : listOfCells){
-                if (el.getState() != INCLUSION){
+            for (Cell el : listOfCells) {
+                if (el.getState() != INCLUSION) {
                     Cell.getListOfGrains().remove(el.getGrain());
                     el.setState(EMPTY);
                     el.setGrain(null);
@@ -844,13 +935,13 @@ public class Model {
         }
     }
 
-    public double countGB(){
+    public double countGB() {
         double result = 0.0;
         double counter = 0;
         double area = width * height;
 
-        for (Cell el : listOfCells){
-            if (el.getState().equals(INCLUSION)){
+        for (Cell el : listOfCells) {
+            if (el.getState().equals(INCLUSION)) {
                 counter++;
             }
         }
