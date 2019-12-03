@@ -14,6 +14,7 @@ public class Cell {
     private CellState state;
     private boolean onBorder;
     private Coordinates cords;
+    private double energy;
 
     public Cell(Coordinates cords) {
         state = EMPTY;
@@ -72,12 +73,12 @@ public class Cell {
 
                 randomColor = Color.color(r, g, b);
             } while (!isGrainColorAvailable(randomColor));
-            grain = new Grain(listOfGrains.size(), randomColor);
+            grain = new Grain((Grain.iteratorID + 1), randomColor);
             listOfGrains.add(grain);
             state = GRAIN;
         } else {
             if (!Grain.getTakenColors().contains(color) && !Grain.restrictedColors.contains(color)) {
-                grain = new Grain(listOfGrains.size(), color);
+                grain = new Grain((Grain.iteratorID + 1), color);
                 listOfGrains.add(grain);
                 Grain.getTakenColors().add(color);
                 state = GRAIN;
@@ -119,9 +120,6 @@ public class Cell {
                 state = GRAIN;
             }
         }
-
-//        if (state == EMPTY)
-//            state = GRAIN;
     }
 
     public void turnToGrain(int ID, CellState state, Color color, boolean onBorder) {
@@ -167,5 +165,13 @@ public class Cell {
                 return g;
         }
         return new Grain(-1, Grain.INCLUSION_COLOR);// null;
+    }
+
+    public double getEnergy() {
+        return energy;
+    }
+
+    public void setEnergy(double energy) {
+        this.energy = energy;
     }
 }

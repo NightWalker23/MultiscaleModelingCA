@@ -10,6 +10,7 @@ public class Grain {
     public static int INCLUSION_ID = -1;
     public static int DUAL_PHASE_ID = -2;
     private boolean frozen;
+    public static int iteratorID = 0;
 
     private Color color;
     public static Color INCLUSION_COLOR = Color.BLACK;
@@ -42,6 +43,7 @@ public class Grain {
             takenColors.add(color);
         }
         frozen = false;
+        iteratorID++;
     }
 
     public boolean isFrozen() {

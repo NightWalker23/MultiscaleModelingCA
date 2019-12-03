@@ -16,6 +16,7 @@ import model.DataIE.TextFileIE;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+
 import static model.InclusionTypes.*;
 import static model.CellState.*;
 import static model.StructureTypes.*;
@@ -26,8 +27,8 @@ public class Controller implements Initializable {
     public Canvas canvas;
     public MenuItem menuItemImportDataFile, menuItemImportBitmap, menuItemIExportDataFile, menuItemIExportBitmap;
     public Menu menuImport, menuExport;
-    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange, fieldGB, fieldIterationsMC, fieldJ;
-    public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonSelectAll, buttonUnselectAll,  buttonStructureStart, buttonClearSpace;
+    public TextField fieldGrains, fieldX, fieldY, fieldInclusionsAmount, fieldInclusionsSize, fieldProbabilityToChange, fieldGB, fieldIterationsMC, fieldJ, fieldGrainEnergy, fieldGrainEnergySpread, fieldBorderEnergy, fieldBorderEnergySpread;
+    public Button buttonGrowth, buttonNucleating, buttonClear, buttonAddInclusions, buttonSelectAll, buttonUnselectAll, buttonStructureStart, buttonClearSpace;
     public ChoiceBox<String> choiceBoxInclusionsType, choiceBoxStructureType;
     public CheckBox checkBoxNewGrowth, checkBoxGB;
     public Label labelGB;
@@ -40,6 +41,7 @@ public class Controller implements Initializable {
     private InclusionTypes inclusionsType;
     private StructureTypes structureTypes;
     private ToggleGroup radioGroup;
+    private boolean energyFlag;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -88,6 +90,8 @@ public class Controller implements Initializable {
 
         fieldJ.setText("1");
         fieldIterationsMC.setText("1");
+
+        energyFlag = false;
     }
 
     public void importDataFile(ActionEvent actionEvent) {
@@ -127,8 +131,8 @@ public class Controller implements Initializable {
         y = readValueFromTextField(fieldX);
 
         cleanCanvas();
-        if (model != null){
-            if (model.getWidth() != y || model.getHeight() != x){
+        if (model != null) {
+            if (model.getWidth() != y || model.getHeight() != x) {
                 createNewModel();
             }
         } else {
@@ -141,11 +145,11 @@ public class Controller implements Initializable {
 
         if (model != null) {
             numberOfGrains = readValueFromTextField(fieldGrains);
-            if (numberOfGrains > model.getListOfAvailableCells().size()){
+            if (numberOfGrains > model.getListOfAvailableCells().size()) {
                 numberOfGrains = model.getListOfAvailableCells().size();
             }
 
-            if (radioGroup.getSelectedToggle().equals(radioCA)){
+            if (radioGroup.getSelectedToggle().equals(radioCA)) {
                 model.fillGridWIthGrains(numberOfGrains);
             } else {
                 model.fillGridWIthGrainsMC(numberOfGrains);
@@ -194,7 +198,7 @@ public class Controller implements Initializable {
     public void startAddInclusions(ActionEvent actionEvent) {
         int amount = readValueFromTextField(fieldInclusionsAmount);
         int radius = readValueFromTextField(fieldInclusionsSize);
-        if (model == null){
+        if (model == null) {
             createNewModel();
         }
         model.addInclusions(inclusionsType, amount, radius);
@@ -240,21 +244,21 @@ public class Controller implements Initializable {
                     if (holdCell.getState().equals(GRAIN) && holdCell.getGrain() != null) {
                         gc.setFill(holdCell.getGrain().getColor());
                         if (holdCell.isOnBorder() && (model.getListOfSelectedGrainsSubstructure().contains(holdCell.getGrain()) ||
-                                                      model.getListOfSelectedGrainsDualPhase().contains(holdCell.getGrain()))){
+                                model.getListOfSelectedGrainsDualPhase().contains(holdCell.getGrain()))) {
                             gc.setFill(Grain.BORDER_COLOR);
                         }
                         gc.fillRect(i, j, 1, 1);
-                    } else if (holdCell.getState().equals(INCLUSION)){
+                    } else if (holdCell.getState().equals(INCLUSION)) {
                         gc.setFill(Grain.INCLUSION_COLOR);
                         gc.fillRect(i, j, 1, 1);
-                    } else if (holdCell.getState().equals(DP)){
+                    } else if (holdCell.getState().equals(DP)) {
                         gc.setFill(Grain.DUAL_PHASE_COLOR);
                         if (holdCell.isOnBorder() && (model.getListOfSelectedGrainsSubstructure().contains(holdCell.getGrain()) ||
-                                model.getListOfSelectedGrainsDualPhase().contains(holdCell.getGrain()))){
+                                model.getListOfSelectedGrainsDualPhase().contains(holdCell.getGrain()))) {
                             gc.setFill(Grain.BORDER_COLOR);
                         }
                         gc.fillRect(i, j, 1, 1);
-                    } else if (holdCell.getState().equals(EMPTY)){
+                    } else if (holdCell.getState().equals(EMPTY)) {
                         gc.setFill(Grain.BACKGROUND_COLOR);
                         gc.fillRect(i, j, 1, 1);
                     }
@@ -274,6 +278,17 @@ public class Controller implements Initializable {
         return value;
     }
 
+    private double readValueFromTextFieldDouble(TextField field) {
+        double value = 0;
+
+        try {
+            value = Double.parseDouble(field.getText());
+        } catch (NumberFormatException ignored) {
+        }
+
+        return value;
+    }
+
     private void setFieldsText() {
         if (model != null) {
             fieldY.setText(String.valueOf(model.getHeight()));
@@ -287,8 +302,8 @@ public class Controller implements Initializable {
         int x = (int) mouseEvent.getSceneX() - x0;
         int y = (int) mouseEvent.getSceneY() - y0;
 
-        if (model != null){
-            if (x > 0 && x < model.getWidth() && y > 0 && y < model.getHeight()){
+        if (model != null) {
+            if (x > 0 && x < model.getWidth() && y > 0 && y < model.getHeight()) {
                 Grain holdGrain = model.getGrid()[x][y].getGrain();
                 model.addRemoveSelectedGrain(holdGrain, structureTypes);
                 showGridOnCanvas();
@@ -301,10 +316,14 @@ public class Controller implements Initializable {
         int numberOfGrains = readValueFromTextField(fieldGrains);
         boolean type = checkBoxNewGrowth.isSelected();
 
-        if (model != null){
-            if (model.getListOfSelectedGrainsSubstructure().size() > 0 || model.getListOfSelectedGrainsDualPhase().size() > 0){
+        if (model != null) {
+            if (model.getListOfSelectedGrainsSubstructure().size() > 0 || model.getListOfSelectedGrainsDualPhase().size() > 0) {
                 if (probabilityToChange > 0) {
-                    model.startStructure(type, probabilityToChange, numberOfGrains);
+                    if (radioGroup.getSelectedToggle().equals(radioCA)) {
+                        model.startStructure(type, probabilityToChange, numberOfGrains);
+                    } else {
+                        model.startStructureMC(type, probabilityToChange, numberOfGrains);
+                    }
                 }
             }
             showGridOnCanvas();
@@ -312,19 +331,19 @@ public class Controller implements Initializable {
     }
 
     public void startSelectAll(ActionEvent actionEvent) {
-        if (model != null){
-            if (structureTypes.equals(SUBSTRUCTURE)){
+        if (model != null) {
+            if (structureTypes.equals(SUBSTRUCTURE)) {
                 model.setListOfSelectedGrainsDualPhase(new ArrayList<>());
-            } else if (structureTypes.equals(DUAL_PHASE)){
+            } else if (structureTypes.equals(DUAL_PHASE)) {
                 model.setListOfSelectedGrainsSubstructure(new ArrayList<>());
             }
             model.setListOfSelectedGrainsGB(new ArrayList<>());
 
-            for (Grain el : Cell.getListOfGrains()){
+            for (Grain el : Cell.getListOfGrains()) {
                 el.setFrozen(true);
-                if (structureTypes.equals(SUBSTRUCTURE)){
+                if (structureTypes.equals(SUBSTRUCTURE)) {
                     model.addElementToListOfSelectedGrainsSubstructure(el);
-                } else if (structureTypes.equals(DUAL_PHASE)){
+                } else if (structureTypes.equals(DUAL_PHASE)) {
                     model.addElementToListOfSelectedGrainsDualPhase(el);
                 }
                 model.addElementToListOfSelectedGrainsGB(el);
@@ -334,8 +353,8 @@ public class Controller implements Initializable {
     }
 
     public void startUnselectAll(ActionEvent actionEvent) {
-        if (model != null){
-            for (Grain el : Cell.getListOfGrains()){
+        if (model != null) {
+            for (Grain el : Cell.getListOfGrains()) {
                 el.setFrozen(false);
             }
             model.setListOfSelectedGrainsDualPhase(new ArrayList<>());
@@ -348,13 +367,57 @@ public class Controller implements Initializable {
     public void startClearSpace(ActionEvent actionEvent) {
         int gbSize = readValueFromTextField(fieldGB);
 
-        if (model != null && checkBoxGB.isSelected()){
+        if (model != null && checkBoxGB.isSelected()) {
             model.clearSpace(gbSize);
             showGridOnCanvas();
             model.setChanged(false);
             model.setChangedRandom(false);
 
             labelGB.setText(String.valueOf(model.countGB()) + " %");
+        }
+    }
+
+    public void startSetEnergy(ActionEvent actionEvent) {
+        double grainEnergy, grainEnergySpread, borderEnergy, borderEnergySpread;
+        grainEnergy = readValueFromTextFieldDouble(fieldGrainEnergy);
+        grainEnergySpread = readValueFromTextFieldDouble(fieldGrainEnergySpread);
+        borderEnergy = readValueFromTextFieldDouble(fieldBorderEnergy);
+        borderEnergySpread = readValueFromTextFieldDouble(fieldBorderEnergySpread);
+
+        if (model != null) {
+            model.setEnergy(grainEnergy, grainEnergySpread, borderEnergy, borderEnergySpread);
+            energyFlag = false;
+        }
+    }
+
+    public void startShowHideEnergy(ActionEvent actionEvent) {
+        double minEnergy, maxEnergy, energy;
+        double minColor = 0.0, maxColor = 255.0;
+        int x;
+
+        if (model != null) {
+            if (energyFlag) {
+                showGridOnCanvas();
+            } else {
+                Cell holdGrid[][] = model.getGrid();
+
+                minEnergy = model.getMinEnergy();
+                maxEnergy = model.getMaxEnergy();
+
+                for (int i = 0; i < model.getWidth(); i++) {
+                    for (int j = 0; j < model.getHeight(); j++) {
+                        Cell holdCell = holdGrid[i][j];
+
+                        energy = holdCell.getEnergy();
+                        x = (int)(minColor + (maxColor - minColor) * ((energy - minEnergy) / (maxEnergy - minEnergy)));
+
+                        gc.setFill(Color.rgb(x, x, x));
+                        gc.fillRect(i, j, 1, 1);
+                    }
+                }
+            }
+
+            energyFlag = !energyFlag;
         }
     }
 }

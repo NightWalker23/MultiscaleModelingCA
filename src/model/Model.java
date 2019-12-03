@@ -989,4 +989,34 @@ public class Model {
 
         return result;
     }
+
+    public void setEnergy(double grainEnergy, double grainEnergySpread, double borderEnergy, double borderEnergySpread){
+        double noise;
+        for (Cell el : listOfCells) {
+            if (el.isOnBorder()){
+                noise = ThreadLocalRandom.current().nextDouble(-grainEnergySpread, grainEnergySpread);
+                el.setEnergy(grainEnergy + noise);
+            } else {
+                noise = ThreadLocalRandom.current().nextDouble(-borderEnergySpread, borderEnergySpread);
+                el.setEnergy(borderEnergy + noise);
+            }
+        }
+    }
+
+    public double getMinEnergy(){
+        double minEnergy = listOfCells.get(0).getEnergy();
+        for (Cell el : listOfCells){
+            minEnergy = Math.min(el.getEnergy(), minEnergy);
+        }
+        return minEnergy;
+    }
+
+    public double getMaxEnergy(){
+        double maxEnergy = listOfCells.get(0).getEnergy();
+        for (Cell el : listOfCells){
+            maxEnergy = Math.max(el.getEnergy(), maxEnergy);
+        }
+        return maxEnergy;
+    }
+
 }

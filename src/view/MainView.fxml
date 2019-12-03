@@ -78,11 +78,21 @@
             <Label fx:id="labelGB" layoutX="601.0" layoutY="465.0" text="Label" />
             <RadioButton fx:id="radioCA" layoutX="708.0" layoutY="35.0" mnemonicParsing="false" text="CA" AnchorPane.leftAnchor="710.0" AnchorPane.topAnchor="35.0" />
             <RadioButton fx:id="radioMC" layoutX="757.0" layoutY="35.0" mnemonicParsing="false" text="MC" AnchorPane.leftAnchor="755.0" AnchorPane.topAnchor="35.0" />
-            <Label layoutX="710.0" layoutY="68.0" text="Iterations" />
+            <Label layoutX="710.0" layoutY="68.0" text="Iterations" AnchorPane.leftAnchor="710.0" AnchorPane.topAnchor="68.0" />
             <TextField fx:id="fieldIterationsMC" layoutX="762.0" layoutY="64.0" prefHeight="25.0" prefWidth="66.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="64.0" />
             <TextField fx:id="fieldJ" layoutX="760.0" layoutY="99.0" prefHeight="25.0" prefWidth="66.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="99.0" />
             <Label layoutX="753.0" layoutY="103.0" text="J" AnchorPane.leftAnchor="753.0" AnchorPane.topAnchor="103.0" />
             <Line endX="-32.0" endY="-134.0" layoutX="735.0" layoutY="170.0" startX="-32.0" startY="379.5" stroke="#a1a1a1" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="705.0" AnchorPane.topAnchor="30.0" />
+            <TextField fx:id="fieldGrainEnergy" layoutX="769.0" layoutY="166.0" prefHeight="25.0" prefWidth="63.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="150.0" />
+            <TextField fx:id="fieldGrainEnergySpread" layoutX="779.0" layoutY="176.0" prefHeight="25.0" prefWidth="63.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="180.0" />
+            <TextField fx:id="fieldBorderEnergy" layoutX="789.0" layoutY="186.0" prefHeight="25.0" prefWidth="63.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="220.0" />
+            <TextField fx:id="fieldBorderEnergySpread" layoutX="799.0" layoutY="196.0" prefHeight="25.0" prefWidth="63.0" AnchorPane.leftAnchor="765.0" AnchorPane.topAnchor="250.0" />
+            <Label layoutX="733.0" layoutY="154.0" text="Grain En" AnchorPane.leftAnchor="713.0" AnchorPane.topAnchor="154.0" />
+            <Label layoutX="713.0" layoutY="184.0" text="Spread" AnchorPane.leftAnchor="718.0" AnchorPane.topAnchor="184.0" />
+            <Label layoutX="712.0" layoutY="225.0" text="Border En" AnchorPane.leftAnchor="710.0" AnchorPane.topAnchor="225.0" />
+            <Label layoutX="715.0" layoutY="248.0" text="Spread" AnchorPane.leftAnchor="718.0" AnchorPane.topAnchor="255.0" />
+            <Button fx:id="buttonSetEnergy" layoutX="716.0" layoutY="295.0" mnemonicParsing="false" onAction="#startSetEnergy" prefHeight="25.0" prefWidth="128.0" text="Set Energy" AnchorPane.leftAnchor="716.0" AnchorPane.topAnchor="285.0" />
+            <Button fx:id="buttonShowHideEnergy" layoutX="716.0" layoutY="320.0" mnemonicParsing="false" onAction="#startShowHideEnergy" prefHeight="25.0" prefWidth="128.0" text="Show/Hide Energy" AnchorPane.leftAnchor="716.0" AnchorPane.topAnchor="320.0" />
          </children>
       </AnchorPane>
    </children>
